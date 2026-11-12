@@ -36,7 +36,7 @@ https://web.archive.org/web/20020119225225/http://www.megasoncenter.co.il/
 
 ## Features
 
-- Games: 15 systems, from Mega Drive to Wii and DS, with 144 real LaunchBox covers each and no repeats.
+- Games: 15 systems, megadrive, gamegear, gameboy, wii, xbox, ps2, gamecube and more just for browsing nothing to download :)
 - Game pop-up: box art, the disc or cartridge, 4 gameplay screenshots and a price.
 - Shelf signs: click one to restock that shelf with any system.
 - Glass cases: 13 consoles and handhelds, each home console with its controller. Click one for its photo and history.
