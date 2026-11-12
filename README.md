@@ -34,6 +34,15 @@ https://web.archive.org/web/20020119225225/http://www.megasoncenter.co.il/
 
 ![Reading an issue of Freak](screenshots/magazine.jpg)
 
+## Features
+
+- Games: 15 systems, from Mega Drive to Wii and DS, with 144 real LaunchBox covers each and no repeats.
+- Game pop-up: box art, the disc or cartridge, 4 gameplay screenshots and a price.
+- Shelf signs: click one to restock that shelf with any system.
+- Glass cases: 13 consoles and handhelds, each home console with its controller. Click one for its photo and history.
+- Shopkeeper (Moshe): recommends games by system and genre, and tells you where things are.
+- Magazine table: real Wiz and Freak issues you can read page by page in the store.
+
 ## Updating the data
 
 - `python3 launchbox_covers.py --metadata Metadata.zip` – picks cover art links per system (download `Metadata.zip` from LaunchBox first; it isn't stored in this repo).
