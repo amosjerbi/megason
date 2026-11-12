@@ -1,4 +1,4 @@
-# Mega son Center
+# Megason Center
 
 באמצע שנות ה-90 נחשפתי לעולם המרהיב של תעשיית הגיימינג, הכל היה רענן והיו קפיצות דוריות בין טכנולוגיות ובמרכז של כל זה היתה חנות קטנה בשם מגה סאן סנטר שהתחילה את דרכה כחנות קטנה בקניון של נווה חוף ואחרי כמה שנים עברה החנות לקניון הזהב.
 
@@ -9,7 +9,7 @@
 
 ---
 
-In the mid-90s, I was introduced to the fascinating world of the gaming industry. Everything felt fresh and exciting, with major generational leaps in technology happening one after another. At the heart of it all was a small store called Mega Son Center.
+In the mid-90s, I was introduced to the fascinating world of the gaming industry. Everything felt fresh and exciting, with major generational leaps in technology happening one after another. At the heart of it all was a small store called Megason Center.
 
 It started out as a tiny shop in Neve Hof Mall and, a few years later, moved to Golden Mall. The guy behind the counter was Moshe, who would later earn the nickname “The Hammer” for being notoriously tough when it came to pricing.
 
