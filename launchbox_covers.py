@@ -36,8 +36,14 @@ SYSTEMS = {
     "dc":     ("dreamcast", "Sega Dreamcast"),
     "gg":     ("gamegear",  "Sega Game Gear"),
     "gb":     ("gb",        "Nintendo Game Boy"),
+    "ps2":    ("ps2",       "Sony Playstation 2"),
+    "x360":   ("xbox360",   "Microsoft Xbox 360"),
+    "psp":    ("psp",       "Sony PSP"),
+    "gba":    ("gba",       "Nintendo Game Boy Advance"),
+    "wii":    ("wii",       "Nintendo Wii"),
+    "nds":    ("nds",       "Nintendo DS"),
 }
-ALIASES = {v[0]: k for k, v in SYSTEMS.items()} | {k: k for k in SYSTEMS} | {"genesis": "md", "playstation": "ps1", "gamecube": "gc", "gameboy": "gb", "game gear": "gg"}
+ALIASES = {v[0]: k for k, v in SYSTEMS.items()} | {k: k for k in SYSTEMS} | {"genesis": "md", "playstation": "ps1", "gamecube": "gc", "gameboy": "gb", "game gear": "gg", "playstation2": "ps2", "xbox360": "x360", "gameboyadvance": "gba", "ds": "nds"}
 REGION_ORDER = ["World", "North America", "United States", "Europe", "United Kingdom", "Japan", None, ""]
 MARK = "<!--PV_LAUNCHBOX-->"
 
@@ -118,7 +124,7 @@ def embed(html_path, data, out_path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--systems", nargs="+", default=list(SYSTEMS), help="md saturn snes n64 ps1 gc dc gg gb (folder names work too)")
+    ap.add_argument("--systems", nargs="+", default=list(SYSTEMS), help="md saturn snes n64 ps1 gc dc gg gb ps2 x360 psp gba wii nds (folder names work too)")
     ap.add_argument("--per-system", type=int, default=144, help="covers per system (the store holds up to 144)")
     ap.add_argument("--region", default=None, help='preferred cover region, e.g. "Europe" or "Japan"')
     ap.add_argument("--seed", type=int, default=None, help="repeat the same random pick")

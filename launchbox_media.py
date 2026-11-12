@@ -23,8 +23,10 @@ PLATFORMS = {
     "md": "Sega Genesis", "saturn": "Sega Saturn", "snes": "Super Nintendo Entertainment System",
     "n64": "Nintendo 64", "ps1": "Sony Playstation", "gc": "Nintendo GameCube",
     "dc": "Sega Dreamcast", "gg": "Sega Game Gear", "gb": "Nintendo Game Boy",
+    "ps2": "Sony Playstation 2", "x360": "Microsoft Xbox 360", "psp": "Sony PSP",
+    "gba": "Nintendo Game Boy Advance", "wii": "Nintendo Wii", "nds": "Nintendo DS",
 }
-DISC = {"saturn", "ps1", "gc", "dc"}  # everything else is a cartridge
+DISC = {"saturn", "ps1", "gc", "dc", "ps2", "x360", "psp", "wii"}  # everything else is a cartridge
 MEDIA_TYPES = {True: ["Disc", "Fanart - Disc"], False: ["Cart - Front", "Fanart - Cart - Front", "Cart - 3D"]}
 SHOT_TYPES = ["Screenshot - Gameplay", "Screenshot - Game Select", "Screenshot - Game Title"]
 REGIONS = ["World", "North America", "United States", "Europe", "United Kingdom", "Japan", None, ""]
