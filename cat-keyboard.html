@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keyboard Cat</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dialkit@2.1.0/dist/vanilla/styles.css">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#e9e1d4;font-family:Inter,system-ui,sans-serif}
+  canvas{display:block}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// Standalone viewer for a black cat figurine lying with its chin on a backlit keyboard, built on the same low-poly basis as the shopkeeper (shopkeeper.html):
+// flat-shaded primitives, a smooth-union skull + muzzle head, and every feature driven by the DialKit panel.
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xe9e1d4);
+const camera=new THREE.PerspectiveCamera(32,innerWidth/innerHeight,.01,50);camera.position.set(-.35,.42,.95);
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true}); /* preserveDrawingBuffer lets DialKit capture version thumbnails */ renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff,0x887766,1.5));
+const sun=new THREE.DirectionalLight(0xffffff,1.8);sun.position.set(-2,3,3);scene.add(sun);
+const rim=new THREE.DirectionalLight(0xbfd4ff,.8);rim.position.set(2,2,-3);scene.add(rim);
+const floorMat=new THREE.MeshLambertMaterial({color:0xcdb89c});
+const floor=new THREE.Mesh(new THREE.CircleGeometry(1,48),floorMat);floor.rotation.x=-Math.PI/2;scene.add(floor);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(.05,.08,-.05);controls.enableDamping=true;controls.minDistance=.2;controls.maxDistance=4;controls.update();
+
+// any CSS colour (hex, rgb, hsl, oklch, display-p3...) -> THREE.Color, via a 1px canvas for formats three can't parse
+const _cc=document.createElement('canvas');_cc.width=_cc.height=1;const _cx=_cc.getContext('2d',{willReadFrequently:true});
+function col(v){const c=new THREE.Color();if(typeof v==='number')return c.set(v);if(/^(#|rgb|hsl)/i.test(v))return c.setStyle(v);
+  _cx.clearRect(0,0,1,1);_cx.fillStyle='#000';_cx.fillStyle=v;_cx.fillRect(0,0,1,1);const d=_cx.getImageData(0,0,1,1).data;return c.setRGB(d[0]/255,d[1]/255,d[2]/255,THREE.SRGBColorSpace);}
+
+// Controls. Slider tuples are [default, min, max, step].
+const CFG={
+  fur:{color:'#1e1d24',gloss:[18,0,120,1]},
+  pose:{length:[.88,.7,1.3,.01],plump:[1,.8,1.25,.01],headRoll:[.32,-.2,.6,.01],headYaw:[.12,-.4,.4,.01],headPitch:[.05,-.2,.3,.01],reach:[1,.5,1.3,.02],tuck:[1,0,1.3,.05]},
+  head:{width:[1,.8,1.25,.01],height:[1,.8,1.2,.01],depth:[1,.85,1.2,.01],muzzle:[1,.7,1.3,.01],facets:[12,6,32,1]},
+  ears:{height:[1.05,.6,1.5,.02],width:[1.05,.7,1.4,.02],spread:[.6,.3,1,.01],tilt:[.05,-.2,.5,.01],inner:'#3c4a8e',lashes:true},
+  eyes:{spacing:[.058,.04,.075,.001],height:[.004,-.02,.03,.001],size:[.033,.02,.042,.001],round:[1.08,.8,1.5,.02],white:'#f5f3ee',pupil:'#141318',
+    pupilWidth:[.42,.15,.8,.01],pupilHeight:[.62,.3,1,.01],cross:[.001,-.006,.01,.0005],lazyX:[0,-.008,.008,.0005]},
+  nose:{color:'#e07a4a',size:[1,.5,1.8,.05],height:[-.032,-.05,-.01,.001]},
+  mouth:{show:true,color:'#0c0b0e'},
+  whiskers:{show:true,color:'#4a4952',length:[1,.5,1.6,.05],droop:[.12,-.2,.4,.01],_collapsed:true},
+  tail:{show:true,curl:[1,.4,1.4,.02],thickness:[1,.6,1.5,.05],_collapsed:true},
+  paws:{toes:true,_collapsed:true},
+  keyboard:{show:true,frame:'#c6ccd4',keycap:'#d9dee3',glow:'#3fc3ff',glowStrength:[1,0,2,.05],cols:[14,8,18,1],rows:[5,3,6,1]},
+  scene:{background:'#e9e1d4',floor:'#cdb89c',animate:true,_collapsed:true},
+};
+// the same config resolved to plain default values (used if DialKit can't load)
+const defaults=c=>Object.fromEntries(Object.entries(c).filter(([k])=>k[0]!=='_').map(([k,v])=>[k,Array.isArray(v)?v[0]:(v&&typeof v==='object')?defaults(v):v]));
+
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+// a flat ribbon (bow tails) along a curve; wave twists it around its own length
+function ribbonGeo(pts,width,thick,wave){
+  const curve=new THREE.CatmullRomCurve3(pts),N=22,pos=[],idx=[];
+  for(let i=0;i<=N;i++){const u=i/N,p=curve.getPoint(u),t=curve.getTangent(u);
+    const side=new THREE.Vector3().crossVectors(t,V(0,0,1)).normalize().applyAxisAngle(t,wave*Math.sin(u*Math.PI*2.2));
+    const nrm=new THREE.Vector3().crossVectors(side,t).normalize(),w=width*(1-.25*u)/2;
+    for(const[a,b]of[[1,1],[-1,1],[-1,-1],[1,-1]]){const q=p.clone().addScaledVector(side,a*w).addScaledVector(nrm,b*thick/2);pos.push(q.x,q.y,q.z);}}
+  for(let i=0;i<N;i++)for(let j=0;j<4;j++){const a=i*4+j,b=i*4+(j+1)%4,c=a+4,d=b+4;idx.push(a,c,b,b,c,d);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();return g;}
+
+let cat=null;
+function buildCat(D){
+  const g=new THREE.Group();scene.add(g);
+  const F=D.fur,H=D.head,E=D.ears,Y=D.eyes,N=D.nose,W=D.whiskers,T=D.tail;
+  const glossy=(c,s=F.gloss)=>new THREE.MeshPhongMaterial({color:col(c),shininess:s,specular:0x3a3a44,flatShading:true});
+  const fl=c=>new THREE.MeshLambertMaterial({color:col(c),flatShading:true});
+  const fur=glossy(F.color),inner=glossy(E.inner,F.gloss*.6),white=glossy(Y.white,60),pupil=glossy(Y.pupil,90),nose=glossy(N.color,50),
+    whisk=fl(W.color),mouth=fl(D.mouth.color);
+  const P=(geo,mat,px,py,pz,par=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);par.add(m);return m;};
+  const PO=D.pose,Ln=PO.length,Pl=PO.plump;
+  const ell=(rx,ry,rz,px,py,pz,seg=Math.round(H.facets))=>{const m=P(new THREE.SphereGeometry(1,seg,Math.max(4,Math.round(seg*.7))),fur,px,py,pz);m.scale.set(rx,ry,rz);return m;};
+  const limb=(a,b,r)=>{const d=new THREE.Vector3().subVectors(b,a),m=P(new THREE.CapsuleGeometry(r,Math.max(.001,d.length()),4,8),fur,(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);
+    m.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return m;};
+  const paw=(x,y,z,ry,r)=>{const p=P(new THREE.SphereGeometry(r,8,6),fur,x,y,z);p.scale.set(1,.6,1.25);p.rotation.y=ry;
+    if(D.paws.toes)for(const k of[-1,0,1]){const tx=x+Math.cos(ry)*k*r*.42+Math.sin(ry)*r*1.0,tz=z-Math.sin(ry)*k*r*.42+Math.cos(ry)*r*1.0;
+      const t=P(new THREE.SphereGeometry(r*.42,6,5),fur,tx,y-r*.12,tz);t.scale.set(1,.85,1.1);}};
+
+  // ---- body lying flat, stretched out behind the head: chest, long torso, a raised haunch at the back
+  ell(.095*Pl,.075*Pl,.12,0,.075*Pl,-.02);                                        // chest
+  ell(.1*Pl,.085*Pl,.25*Ln,-.01,.085*Pl,-.2*Ln);                                    // torso
+  ell(.11*Pl,.1*Pl,.13*Ln,-.035,.095*Pl,-.38*Ln).rotation.y=.2;                     // haunch
+  // front legs: the cat's right leg stretches forward along the floor, the left one bends with its paw tucked by the chin
+  {const sh=V(-.06,.06,-.01),pw=V(-.1,.026,.24*PO.reach);limb(sh,pw,.03);paw(pw.x,.024,pw.z+.012,-.12,.036);}
+  {const sh=V(.055,.055,-.02),el=V(.075,.03,.07*PO.tuck+.02),pw=V(.05,.026,.12*PO.tuck+.03);limb(sh,el,.03);limb(el,pw,.028);paw(pw.x,.024,pw.z+.01,-.5,.034);}
+  // hind leg folded forward along the right side, paw resting out front
+  {const hip=V(-.09,.07,-.38*Ln),kn=V(-.14,.04,-.25*Ln),pw=V(-.19,.026,-.1*Ln);ell(.05,.07,.1,-.1,.07,-.33*Ln).rotation.y=-.3;limb(kn,pw,.029);paw(pw.x,.024,pw.z+.012,-.35,.037);}
+  // tail curling round from the rump towards the front on the right side
+  const tail=new THREE.Group();g.add(tail);
+  if(T.show){const c=T.curl,pts=[V(-.02,.06,-.47*Ln),V(-.1,.035,-.55*Ln),V(-.2,.025,-.5*Ln),V(-.27*c,.022,-.36*Ln*c),V(-.3*c,.022,-.18*Ln*c)];
+    const tr=.02*T.thickness;P(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),28,tr,6),fur,0,0,0,tail);const e=pts[pts.length-1];P(new THREE.SphereGeometry(tr,6,5),fur,e.x,e.y,e.z,tail);}
+
+  // ---- keyboard: brushed aluminium case, light grey keycaps on a glowing blue plate, its front-left corner under the cat's chin
+  const KB=D.keyboard;let kbTop=0;
+  if(KB.show){const kb=new THREE.Group();kb.position.set(.3,0,.1);kb.rotation.y=-.38;g.add(kb);
+    const cols=Math.round(KB.cols),rows=Math.round(KB.rows),pitch=.04,w=cols*pitch+.03,d=rows*pitch+.03,caseH=.03;
+    const alu=new THREE.MeshPhongMaterial({color:col(KB.frame),shininess:90,specular:0x888888,flatShading:true});
+    const cs=new THREE.ExtrudeGeometry((()=>{const r=.012,sh=new THREE.Shape();sh.moveTo(-w/2+r,-d/2);sh.lineTo(w/2-r,-d/2);sh.quadraticCurveTo(w/2,-d/2,w/2,-d/2+r);sh.lineTo(w/2,d/2-r);sh.quadraticCurveTo(w/2,d/2,w/2-r,d/2);
+      sh.lineTo(-w/2+r,d/2);sh.quadraticCurveTo(-w/2,d/2,-w/2,d/2-r);sh.lineTo(-w/2,-d/2+r);sh.quadraticCurveTo(-w/2,-d/2,-w/2+r,-d/2);return sh;})(),{depth:caseH,bevelEnabled:true,bevelSize:.004,bevelThickness:.004,bevelSegments:1,curveSegments:3});
+    cs.rotateX(-Math.PI/2);const caseM=P(cs,alu,0,.004,0,kb);
+    const glowC=col(KB.glow),plate=P(new THREE.BoxGeometry(w-.018,.004,d-.018),new THREE.MeshBasicMaterial({color:glowC.clone().multiplyScalar(.35+.5*KB.glowStrength)}),0,caseH+.006,0,kb);
+    const capM=new THREE.MeshPhongMaterial({color:col(KB.keycap),shininess:30,specular:0x333333,flatShading:true,emissive:glowC,emissiveIntensity:.06*KB.glowStrength});
+    const capG=new THREE.CylinderGeometry(pitch*.5,pitch*.64,.018,4,1);capG.rotateY(Math.PI/4);
+    for(let r=0;r<rows;r++){let x=-w/2+.015,last=r===rows-1;
+      for(let c=0;c<cols;){let span=1;if(last&&c===3)span=Math.max(2,cols-7);else if(r===0&&c===cols-1)span=1;else if(r===2&&c===0)span=1.5;
+        const k=P(capG,capM,x+span*pitch/2,caseH+.017,-d/2+.015+(r+.5)*pitch,kb);k.scale.set(span,1,1);x+=span*pitch;c+=Math.ceil(span);}}
+    if(KB.glowStrength>0){const pl=new THREE.PointLight(glowC,.06*KB.glowStrength,.6,1.5);pl.position.set(0,caseH+.05,0);kb.add(pl);}
+    kbTop=caseH+.026;}
+
+  // ---- head: smooth union of a wide skull and a soft muzzle, low-res so the planes read
+  const HY=Math.max(kbTop,.02)+.098*H.height;
+  const head=new THREE.Group();head.position.set(.06,HY,.1);head.rotation.order='YXZ';head.rotation.set(PO.headPitch,PO.headYaw,-PO.headRoll);g.add(head);
+  const A1=[.135*H.width,.112*H.height,.112*H.depth],C2=[0,-.04*H.height,.03*H.depth],A2=[.095*H.muzzle,.068*H.height,.09*H.depth];
+  {const K=.02,seg=Math.round(H.facets),hg=new THREE.SphereGeometry(1,seg,Math.max(4,Math.round(seg*.8))),pa=hg.attributes.position;
+   for(let i=0;i<pa.count;i++){const dx=pa.getX(i),dy=pa.getY(i),dz=pa.getZ(i);
+     const r1=1/Math.sqrt((dx/A1[0])**2+(dy/A1[1])**2+(dz/A1[2])**2);
+     const ox=-C2[0]/A2[0],oy=-C2[1]/A2[1],oz=-C2[2]/A2[2],ux=dx/A2[0],uy=dy/A2[1],uz=dz/A2[2];
+     const qa=ux*ux+uy*uy+uz*uz,qb=2*(ox*ux+oy*uy+oz*uz),qc=ox*ox+oy*oy+oz*oz-1,disc=qb*qb-4*qa*qc;
+     const r2=disc>0?Math.max(0,(-qb+Math.sqrt(disc))/(2*qa)):0;
+     const h=Math.max(K-Math.abs(r1-r2),0)/K,r=Math.max(r1,r2)+h*h*K*.25;
+     pa.setXYZ(i,dx*r,dy*r,dz*r);}
+   hg.computeVertexNormals();P(hg,fur,0,0,0,head);}
+  // a point on the front of the head at (x,y) and its outward normal, so features follow the sliders
+  const onFace=(x,y,push=0)=>{let best=null;for(const[c,a]of[[[0,0,0],A1],[C2,A2]]){const k=1-((x-c[0])/a[0])**2-((y-c[1])/a[1])**2;if(k<=0)continue;
+      const z=c[2]+a[2]*Math.sqrt(k);if(!best||z>best.p.z)best={p:V(x,y,z),n:V((x-c[0])/a[0]**2,(y-c[1])/a[1]**2,(z-c[2])/a[2]**2).normalize()};}
+    if(!best)best={p:V(x,y,0),n:V(Math.sign(x)||0,0,0)};best.p.addScaledVector(best.n,push);return best;};
+  const facing=(m,n)=>m.quaternion.setFromUnitVectors(V(0,0,1),n);
+
+  // ears: tall flat triangles, blue inside, leaning out; optional lashes along the inner edge
+  const ears=[];
+  for(const s of[-1,1]){const ew=.11*E.width,eh=.17*E.height,dep=.016;
+    const ear=new THREE.Group();const phi=E.spread;ear.position.set(s*A1[0]*Math.sin(phi)*.9,A1[1]*Math.cos(phi)*.9-.012,-.012);
+    ear.rotation.order='ZYX';ear.rotation.z=-s*(phi*.55+E.tilt);ear.rotation.y=-s*.3;ear.rotation.x=-.12;head.add(ear);ears.push(ear);
+    const tri=(w,h,ox=0)=>{const sh=new THREE.Shape();sh.moveTo(-w/2+ox,0);sh.lineTo(w/2+ox,0);sh.lineTo(s*w*.08+ox,h);sh.closePath();return sh;};
+    const outer=new THREE.ExtrudeGeometry(tri(ew,eh),{depth:dep,bevelEnabled:true,bevelSize:.004,bevelThickness:.004,bevelSegments:1});outer.translate(0,0,-dep/2);P(outer,fur,0,0,0,ear);
+    const ig=new THREE.ExtrudeGeometry(tri(ew*.66,eh*.74),{depth:.003,bevelEnabled:false});P(ig,inner,0,eh*.1,dep/2+.003,ear);
+    if(E.lashes)for(let k=0;k<4;k++){const u=.06+k*.075,lx=-s*(ew/2)*(1-u)+s*ew*.08*u,ly=eh*u; // fringe on the lower inner edge, poking toward the forehead
+      const l=P(new THREE.BoxGeometry(.0028,.017,.0028),fur,lx-s*.007,ly+.004,dep*.3,ear);l.rotation.z=s*(1.05+k*.08);}}
+
+  // eyes: round whites with tall slit pupils; cross pulls the pupils inward, lazyX drifts the cat's left eye
+  const eyes=[];
+  for(const s of[-1,1]){const f=onFace(s*Y.spacing,Y.height,-.004);
+    const eye=new THREE.Group();eye.position.copy(f.p);facing(eye,f.n);head.add(eye);eyes.push(eye);
+    const w=P(new THREE.SphereGeometry(Y.size,12,8),white,0,0,0,eye);w.scale.set(1,Y.round,.32);
+    const px=-s*Y.cross+(s>0?Y.lazyX:0);
+    const pp=P(new THREE.SphereGeometry(Y.size,10,8),pupil,px,0,Y.size*.27,eye);pp.scale.set(Y.pupilWidth*.62,Y.round*Y.pupilHeight,.1);}
+  // nose: a small orange triangle at the top of the muzzle; mouth: a tiny dark dot below it
+  {const f=onFace(0,N.height,.001),n=P(new THREE.ConeGeometry(.009*N.size,.012*N.size,3),nose,0,0,0,head);n.position.copy(f.p);n.rotation.set(Math.PI/2,0,Math.PI);n.scale.z=.6;
+   if(D.mouth.show){const m=onFace(0,N.height-.028,.0005),mo=P(new THREE.SphereGeometry(.0035,6,4),mouth,0,0,0,head);mo.position.copy(m.p);facing(mo,m.n);mo.scale.set(1.2,.8,.4);}}
+  // whiskers: two thin grey strokes per cheek running out past the head
+  if(W.show)for(const s of[-1,1])for(const k of[0,1]){const f=onFace(s*.055,N.height-.012-k*.016,.001),len=.075*W.length;
+    const w=P(new THREE.BoxGeometry(len,.0026,.0026),whisk,0,0,0,head);
+    w.position.copy(f.p).add(V(s*len*.42,0,-len*.18));w.rotation.order='YXZ';w.rotation.y=s*.4;w.rotation.z=-s*(W.droop+(k?.12:-.04));}
+
+  let nextBlink=1.5+Math.random()*3,nextTwitch=3+Math.random()*4;
+  const r0=head.rotation.clone();
+  const anim=t=>{ // resting: a slow breath, blinks, an occasional ear twitch, the tail tip sways
+    head.rotation.x=r0.x+Math.sin(t*1.3)*.012;head.rotation.y=r0.y+Math.sin(t*.27)*.03;
+    let ey=1;if(t>nextBlink){const k=(t-nextBlink)/.2;if(k<1)ey=1-Math.sin(k*Math.PI)*.92;else nextBlink=t+2.5+Math.random()*4;}
+    for(const e of eyes)e.scale.y=ey;
+    let tw=0;if(t>nextTwitch){const k=(t-nextTwitch)/.25;if(k<1)tw=Math.sin(k*Math.PI)*.25;else nextTwitch=t+3+Math.random()*5;}
+    ears[0].rotation.x=-.12-tw;
+    tail.rotation.y=Math.sin(t*.8)*.035;};
+  cat={g,head,anim};
+}
+
+function disposeTree(g){g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}});}
+let animate=true;
+function build(D){if(cat){scene.remove(cat.g);disposeTree(cat.g);}buildCat(D);
+  scene.background.copy(col(D.scene.background));floorMat.color.copy(col(D.scene.floor));animate=D.scene.animate!==false;}
+build(defaults(CFG));
+// DialKit panel: every change rebuilds the cat (batched to one rebuild per frame). Values persist in this browser.
+try{const {createDialKit,createDialRoot}=await import('https://cdn.jsdelivr.net/npm/dialkit@2.1.0/dist/vanilla/index.js');
+  createDialRoot({position:'top-right',theme:'dark'});
+  const kit=createDialKit('Keyboard cat',CFG,{id:'megason-keyboard-cat-v1',persist:true});
+  let pending=null;kit.subscribe(v=>{const first=pending===null;pending=v;if(first)requestAnimationFrame(()=>{const d=pending;pending=null;build(d);});});
+}catch(err){console.warn('DialKit did not load; showing the cat with default values.',err);}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+renderer.setAnimationLoop(t=>{if(animate)cat.anim(t/1000);controls.update();renderer.render(scene,camera);});
+</script>
+</body>
+</html>
