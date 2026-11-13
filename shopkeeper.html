@@ -383,7 +383,7 @@ build3(defaults(CFG3));
 // DialKit panel: every change rebuilds rev 3 (batched to one rebuild per frame). Values persist in this browser.
 try{const {createDialKit,createDialRoot}=await import('https://cdn.jsdelivr.net/npm/dialkit@2.1.0/dist/vanilla/index.js');
   createDialRoot({position:'top-right',theme:'dark'});
-  const kit=createDialKit('Shopkeeper rev 3',CFG3,{id:'shopkeeper-rev3',persist:true});
+  const kit=createDialKit('Shopkeeper rev 3',CFG3,{id:'shopkeeper-rev3-v2',persist:true});
   let pending=null;kit.subscribe(v=>{const first=pending===null;pending=v;if(first)requestAnimationFrame(()=>{const d=pending;pending=null;build3(d);});});
 }catch(err){console.warn('DialKit did not load; showing rev 3 with default values.',err);}
 function showRev(n){curRev=Number(n);for(const k in revs)revs[k].g.visible=String(k)===String(n);clerk=revs[n];document.querySelectorAll('#revs button').forEach(b=>b.classList.toggle('on',b.dataset.rev===String(n)));}
