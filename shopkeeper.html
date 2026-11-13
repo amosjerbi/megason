@@ -19,7 +19,7 @@
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
-<div id="hud"><b>Shopkeeper model</b><div id="revs"><button data-rev="1">Rev 1 · full hair</button><button data-rev="2">Rev 2 · bald, lazy eye</button><button data-rev="3">Rev 3 · stern, swept hair</button></div><span>Drag to orbit · scroll to zoom · right-drag to pan<br>The DialKit panel (top right) edits rev 3</span></div>
+<div id="hud"><b>Shopkeeper model</b><div id="revs"><button data-rev="1">Rev 1 · full hair</button><button data-rev="2">Rev 2 · bald, lazy eye</button><button data-rev="3">Rev 3 · eagle nose, dials</button></div><span>Drag to orbit · scroll to zoom · right-drag to pan<br>The DialKit panel (top right) edits rev 3</span></div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -27,7 +27,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // Standalone viewer for the store's shopkeeper. salesman() is written so it can be pasted into megason.html as is.
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x86acdc);
 const camera=new THREE.PerspectiveCamera(32,innerWidth/innerHeight,.01,50);camera.position.set(-.55,1.6,1.25);
-const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});   // preserveDrawingBuffer lets DialKit capture version thumbnailsrenderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true}); /* preserveDrawingBuffer lets DialKit capture version thumbnails */ renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xffffff,0x887766,1.5));
 const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-2,3,3);scene.add(sun);
 const rim=new THREE.DirectionalLight(0xbfd4ff,.6);rim.position.set(2,2,-3);scene.add(rim);
