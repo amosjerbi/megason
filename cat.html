@@ -172,7 +172,7 @@ build(defaults(CFG));
 // DialKit panel: every change rebuilds the cat (batched to one rebuild per frame). Values persist in this browser.
 try{const {createDialKit,createDialRoot}=await import('https://cdn.jsdelivr.net/npm/dialkit@2.1.0/dist/vanilla/index.js');
   createDialRoot({position:'top-right',theme:'dark'});
-  const kit=createDialKit('Cat',CFG,{id:'megason-cat-v1',persist:true});
+  const kit=createDialKit('Cat',CFG,{id:'megason-cat-v2',persist:true});
   let pending=null;kit.subscribe(v=>{const first=pending===null;pending=v;if(first)requestAnimationFrame(()=>{const d=pending;pending=null;build(d);});});
 }catch(err){console.warn('DialKit did not load; showing the cat with default values.',err);}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
