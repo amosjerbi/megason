@@ -333,8 +333,8 @@ function salesman3(x,z,ry){
     }
   P(boxGeo(.026,.0025,.0025),wire,0,.143,.112,head);
   // soft moustache, only a slight droop, and a relaxed straight mouth
-  for(const sx of[-1,1]){const m=P(new THREE.CylinderGeometry(.009,.005,.042,5),stache,sx*.02,.077,.111,head);m.rotation.set(0,sx*-.25,sx*(Math.PI/2-.14));m.scale.z=.75;}
-  const mc=P(new THREE.SphereGeometry(.016,6,4),stache,0,.083,.114,head);mc.scale.set(1.6,.6,.7);
+  for(const sx of[-1,1]){const m=P(new THREE.CylinderGeometry(.0135,.008,.046,6),stache,sx*.021,.076,.111,head);m.rotation.set(0,sx*-.25,sx*(Math.PI/2-.14));m.scale.z=.75;}
+  const mc=P(new THREE.SphereGeometry(.019,6,4),stache,0,.082,.114,head);mc.scale.set(1.6,.82,.75);
   P(boxGeo(.03,.0045,.006),lipC,0,.058,.105,head);                                                       // straight deadpan mouth
   }
   const lids=[];
