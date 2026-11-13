@@ -122,9 +122,9 @@ function salesman(x,z,ry){
   // eyes, heavy stern brows, thick round glasses
   for(const sx of[-.041,.041]){P(new THREE.SphereGeometry(.009,6,5),dark,sx,.142,.101,head);
     const br=P(boxGeo(.044,.012,.014),hairD,sx,.169,.103,head);br.rotation.z=sx>0?.13:-.13;
-    P(new THREE.TorusGeometry(.026,.0048,6,20),dark,sx,.142,.11,head);
-    const tm=P(boxGeo(.006,.006,.105),dark,sx*1.66,.146,.058,head);tm.rotation.y=sx>0?-.12:.12;}
-  P(boxGeo(.03,.006,.006),dark,0,.147,.112,head);
+    P(new THREE.TorusGeometry(.026,.0026,6,24),dark,sx,.142,.11,head);
+    const tm=P(boxGeo(.0035,.0035,.105),dark,sx*1.66,.146,.058,head);tm.rotation.y=sx>0?-.12:.12;}
+  P(boxGeo(.03,.0035,.0035),dark,0,.147,.112,head);
   // bushy grey moustache in two drooping halves, small mouth under it
   for(const sx of[-1,1]){const m=P(new THREE.SphereGeometry(.031,8,6),stache,sx*.017,.08,.105,head);m.scale.set(1.2,.55,.6);m.rotation.z=sx*-.3;}
   const mc=P(new THREE.SphereGeometry(.018,6,5),stache,0,.085,.109,head);mc.scale.set(1.3,.6,.6);
@@ -223,9 +223,9 @@ function salesman2(x,z,ry){
   for(const sx of[-.041,.041]){const lazy=sx>0;
     P(new THREE.SphereGeometry(.0085,6,5),dark,sx+(lazy?.009:0),.142+(lazy?-.005:0),.101,head);
     const br=P(boxGeo(.046,.012,.014),hairD,sx,.172,.103,head);br.rotation.z=sx>0?-.14:.14;   // inner ends raised: worried
-    P(new THREE.TorusGeometry(.027,.0048,6,20),dark,sx,.142,.11,head);
-    const tm=P(boxGeo(.006,.006,.105),dark,sx*1.68,.146,.058,head);tm.rotation.y=sx>0?-.12:.12;}
-  P(boxGeo(.03,.006,.006),dark,0,.147,.112,head);
+    P(new THREE.TorusGeometry(.027,.0026,6,24),dark,sx,.142,.11,head);
+    const tm=P(boxGeo(.0035,.0035,.105),dark,sx*1.68,.146,.058,head);tm.rotation.y=sx>0?-.12:.12;}
+  P(boxGeo(.03,.0035,.0035),dark,0,.147,.112,head);
   // flat bar moustache and a straight deadpan mouth
   const mo=P(new THREE.CapsuleGeometry(.0125,.058,3,6),stache,0,.08,.106,head);mo.rotation.z=Math.PI/2;mo.scale.z=.7;
   P(boxGeo(.03,.0045,.006),lipC,0,.058,.103,head);
