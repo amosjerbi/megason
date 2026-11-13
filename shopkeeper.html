@@ -67,7 +67,10 @@ function salesman(x,z,ry){
   for(const sx of[-1,1]){const s=P(new THREE.SphereGeometry(.078,16,12),polo,sx*.182,.5,0,body);s.scale.set(1,.85,.9);}
   // collar, placket and buttons, embroidered logo, name badge
   const back=P(new THREE.TorusGeometry(.066,.016,8,24,Math.PI*1.25),poloD,0,.578,-.005,body);back.rotation.order='YXZ';back.rotation.x=Math.PI/2;back.rotation.y=Math.PI*.625+Math.PI/2;back.scale.set(1,1.15,1);
-  for(const sx of[-1,1]){const c=P(boxGeo(.06,.012,.07),poloD,sx*.038,.572,.085,body);c.rotation.set(-.55,sx*-.55,sx*.3);}
+  for(const sx of[-1,1]){ // collar points: flat triangles from the neckline down onto the chest
+    const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(sx*.085,.004);sh.lineTo(sx*.034,-.078);sh.lineTo(0,0);
+    const cg=new THREE.ExtrudeGeometry(sh,{depth:.008,bevelEnabled:false});
+    const c=P(cg,poloD,sx*.004,.57,.094,body);c.rotation.order='YXZ';c.rotation.y=sx*.4;c.rotation.x=-.5;}
   P(boxGeo(.032,.12,.006),poloD,0,.5,.133,body);for(let k=0;k<3;k++)P(new THREE.SphereGeometry(.0055,8,6),white,0,.548-k*.04,.137,body);
   const logo=textPlane('MEGASON',.075,.019,{bg:'#7f909c',fg:'#ffffff',border:null,res:40});logo.position.set(-.088,.45,.12);logo.rotation.y=-.38;body.add(logo);
   const badge=new THREE.Group();badge.position.set(.09,.43,.121);badge.rotation.y=.38;body.add(badge);
@@ -165,7 +168,10 @@ function salesman2(x,z,ry){
   for(const sx of[-1,1]){const s=P(new THREE.SphereGeometry(.078,16,12),polo,sx*.182,.5,0,body);s.scale.set(1,.85,.9);}
   // collar, placket and buttons, embroidered logo, name badge
   const back=P(new THREE.TorusGeometry(.066,.016,8,24,Math.PI*1.25),poloD,0,.578,-.005,body);back.rotation.order='YXZ';back.rotation.x=Math.PI/2;back.rotation.y=Math.PI*.625+Math.PI/2;back.scale.set(1,1.15,1);
-  for(const sx of[-1,1]){const c=P(boxGeo(.06,.012,.07),poloD,sx*.038,.572,.085,body);c.rotation.set(-.55,sx*-.55,sx*.3);}
+  for(const sx of[-1,1]){ // collar points: flat triangles from the neckline down onto the chest
+    const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(sx*.085,.004);sh.lineTo(sx*.034,-.078);sh.lineTo(0,0);
+    const cg=new THREE.ExtrudeGeometry(sh,{depth:.008,bevelEnabled:false});
+    const c=P(cg,poloD,sx*.004,.57,.094,body);c.rotation.order='YXZ';c.rotation.y=sx*.4;c.rotation.x=-.5;}
   P(boxGeo(.032,.12,.006),poloD,0,.5,.133,body);for(let k=0;k<3;k++)P(new THREE.SphereGeometry(.0055,8,6),white,0,.548-k*.04,.137,body);
   const logo=textPlane('MEGASON',.075,.019,{bg:'#7f909c',fg:'#ffffff',border:null,res:40});logo.position.set(-.088,.45,.12);logo.rotation.y=-.38;body.add(logo);
   const badge=new THREE.Group();badge.position.set(.09,.43,.121);badge.rotation.y=.38;body.add(badge);
