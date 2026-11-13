@@ -1013,6 +1013,113 @@ function salesman(x,z,ry,D=SHOPKEEPER){
     head.rotation.x=Math.sin(t*.7)*.025+Math.max(0,Math.sin(t*.23))*.04;head.rotation.z=Math.sin(t*.37)*.02;};
   clerk={g,body,head,ry,anim};
 }
+/* ---------------- keyboard cat ---------------- built in cat-keyboard.html (DialKit); KBCAT holds its defaults, paste new "Copy parameters" output here */
+let kbCat=null;
+const catV=(x,y,z)=>new THREE.Vector3(x,y,z);
+const KBCAT={"fur":{"color":"#1e1d24","gloss":18},"pose":{"length":0.88,"plump":1,"headRoll":0.32,"headYaw":0.12,"headPitch":0.05,"reach":1,"tuck":1},"head":{"width":1,"height":1,"depth":1,"muzzle":1,"facets":12},"ears":{"height":1.05,"width":1.05,"spread":0.6,"tilt":0.05,"inner":"#3c4a8e","lashes":true},"eyes":{"spacing":0.058,"height":0.004,"size":0.033,"round":1.08,"white":"#f5f3ee","pupil":"#141318","pupilWidth":0.42,"pupilHeight":0.62,"cross":0.001,"lazyX":0},"nose":{"color":"#e07a4a","size":1,"height":-0.032},"mouth":{"show":true,"color":"#0c0b0e"},"whiskers":{"show":true,"color":"#4a4952","length":1,"droop":0.12},"tail":{"show":true,"curl":1,"thickness":1},"paws":{"toes":true},"keyboard":{"show":true,"frame":"#c6ccd4","keycap":"#d9dee3","plate":"#2b2f36","cols":14,"rows":5},"scene":{"background":"#e9e1d4","floor":"#cdb89c","animate":true}};
+function keyboardCat(x,y,z,ry,sc,D=KBCAT){
+  const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=ry;g.scale.setScalar(sc);scene.add(g);
+  const F=D.fur,H=D.head,E=D.ears,Y=D.eyes,N=D.nose,W=D.whiskers,T=D.tail;
+  const glossy=(c,s=F.gloss)=>new THREE.MeshPhongMaterial({color:skCol(c),shininess:s,specular:0x3a3a44,flatShading:true});
+  const fl=c=>new THREE.MeshLambertMaterial({color:skCol(c),flatShading:true});
+  const fur=glossy(F.color),inner=glossy(E.inner,F.gloss*.6),white=glossy(Y.white,60),pupil=glossy(Y.pupil,90),nose=glossy(N.color,50),
+    whisk=fl(W.color),mouth=fl(D.mouth.color);
+  const P=(geo,mat,px,py,pz,par=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);par.add(m);return m;};
+  const PO=D.pose,Ln=PO.length,Pl=PO.plump;
+  const ell=(rx,ry,rz,px,py,pz,seg=Math.round(H.facets))=>{const m=P(new THREE.SphereGeometry(1,seg,Math.max(4,Math.round(seg*.7))),fur,px,py,pz);m.scale.set(rx,ry,rz);return m;};
+  const limb=(a,b,r)=>{const d=new THREE.Vector3().subVectors(b,a),m=P(new THREE.CapsuleGeometry(r,Math.max(.001,d.length()),4,8),fur,(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);
+    m.quaternion.setFromUnitVectors(catV(0,1,0),d.normalize());return m;};
+  const paw=(x,y,z,ry,r)=>{const p=P(new THREE.SphereGeometry(r,8,6),fur,x,y,z);p.scale.set(1,.6,1.25);p.rotation.y=ry;
+    if(D.paws.toes)for(const k of[-1,0,1]){const tx=x+Math.cos(ry)*k*r*.42+Math.sin(ry)*r*1.0,tz=z-Math.sin(ry)*k*r*.42+Math.cos(ry)*r*1.0;
+      const t=P(new THREE.SphereGeometry(r*.42,6,5),fur,tx,y-r*.12,tz);t.scale.set(1,.85,1.1);}};
+
+  // ---- body lying flat, stretched out behind the head: chest, long torso, a raised haunch at the back
+  ell(.095*Pl,.075*Pl,.12,0,.075*Pl,-.02);                                        // chest
+  ell(.1*Pl,.085*Pl,.25*Ln,-.01,.085*Pl,-.2*Ln);                                    // torso
+  ell(.11*Pl,.1*Pl,.13*Ln,-.035,.095*Pl,-.38*Ln).rotation.y=.2;                     // haunch
+  // front legs: the cat's right leg stretches forward along the floor, the left one bends with its paw tucked by the chin
+  {const sh=catV(-.06,.06,-.01),pw=catV(-.1,.026,.24*PO.reach);limb(sh,pw,.03);paw(pw.x,.024,pw.z+.012,-.12,.036);}
+  {const sh=catV(.055,.055,-.02),el=catV(.075,.03,.07*PO.tuck+.02),pw=catV(.05,.026,.12*PO.tuck+.03);limb(sh,el,.03);limb(el,pw,.028);paw(pw.x,.024,pw.z+.01,-.5,.034);}
+  // hind leg folded forward along the right side, paw resting out front
+  {const hip=catV(-.09,.07,-.38*Ln),kn=catV(-.14,.04,-.25*Ln),pw=catV(-.19,.026,-.1*Ln);ell(.05,.07,.1,-.1,.07,-.33*Ln).rotation.y=-.3;limb(kn,pw,.029);paw(pw.x,.024,pw.z+.012,-.35,.037);}
+  // tail curling round from the rump towards the front on the right side
+  const tail=new THREE.Group();g.add(tail);
+  if(T.show){const c=T.curl,pts=[catV(-.02,.06,-.47*Ln),catV(-.1,.035,-.55*Ln),catV(-.2,.025,-.5*Ln),catV(-.27*c,.022,-.36*Ln*c),catV(-.3*c,.022,-.18*Ln*c)];
+    const tr=.02*T.thickness;P(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),28,tr,6),fur,0,0,0,tail);const e=pts[pts.length-1];P(new THREE.SphereGeometry(tr,6,5),fur,e.x,e.y,e.z,tail);}
+
+  // ---- keyboard: brushed aluminium case, light grey keycaps on a dark plate, its front-left corner under the cat's chin
+  const KB=D.keyboard;let kbTop=0;
+  if(KB.show){const kb=new THREE.Group();kb.position.set(.3,0,.1);kb.rotation.y=-.38;g.add(kb);
+    const cols=Math.round(KB.cols),rows=Math.round(KB.rows),pitch=.04,w=cols*pitch+.03,d=rows*pitch+.03,caseH=.03;
+    const alu=new THREE.MeshPhongMaterial({color:skCol(KB.frame),shininess:90,specular:0x888888,flatShading:true});
+    const cs=new THREE.ExtrudeGeometry((()=>{const r=.012,sh=new THREE.Shape();sh.moveTo(-w/2+r,-d/2);sh.lineTo(w/2-r,-d/2);sh.quadraticCurveTo(w/2,-d/2,w/2,-d/2+r);sh.lineTo(w/2,d/2-r);sh.quadraticCurveTo(w/2,d/2,w/2-r,d/2);
+      sh.lineTo(-w/2+r,d/2);sh.quadraticCurveTo(-w/2,d/2,-w/2,d/2-r);sh.lineTo(-w/2,-d/2+r);sh.quadraticCurveTo(-w/2,-d/2,-w/2+r,-d/2);return sh;})(),{depth:caseH,bevelEnabled:true,bevelSize:.004,bevelThickness:.004,bevelSegments:1,curveSegments:3});
+    cs.rotateX(-Math.PI/2);const caseM=P(cs,alu,0,.004,0,kb);
+    P(new THREE.BoxGeometry(w-.018,.004,d-.018),new THREE.MeshLambertMaterial({color:skCol(KB.plate)}),0,caseH+.011,0,kb); // sits clearly above the case top so nothing z-fights
+    const capM=new THREE.MeshPhongMaterial({color:skCol(KB.keycap),shininess:30,specular:0x333333,flatShading:true});
+    const capG=new THREE.CylinderGeometry(pitch*.5,pitch*.64,.018,4,1);capG.rotateY(Math.PI/4);
+    for(let r=0;r<rows;r++){let x=-w/2+.015,last=r===rows-1;
+      for(let c=0;c<cols;){let span=1;if(last&&c===3)span=Math.max(2,cols-7);else if(r===0&&c===cols-1)span=1;else if(r===2&&c===0)span=1.5;
+        const k=P(capG,capM,x+span*pitch/2,caseH+.02,-d/2+.015+(r+.5)*pitch,kb);k.scale.set(span,1,1);x+=span*pitch;c+=Math.ceil(span);}}
+    kbTop=caseH+.029;}
+
+  // ---- head: smooth union of a wide skull and a soft muzzle, low-res so the planes read
+  const HY=Math.max(kbTop,.02)+.098*H.height;
+  const head=new THREE.Group();head.position.set(.06,HY,.1);head.rotation.order='YXZ';head.rotation.set(PO.headPitch,PO.headYaw,-PO.headRoll);g.add(head);
+  const A1=[.135*H.width,.112*H.height,.112*H.depth],C2=[0,-.04*H.height,.03*H.depth],A2=[.095*H.muzzle,.068*H.height,.09*H.depth];
+  {const K=.02,seg=Math.round(H.facets),hg=new THREE.SphereGeometry(1,seg,Math.max(4,Math.round(seg*.8))),pa=hg.attributes.position;
+   for(let i=0;i<pa.count;i++){const dx=pa.getX(i),dy=pa.getY(i),dz=pa.getZ(i);
+     const r1=1/Math.sqrt((dx/A1[0])**2+(dy/A1[1])**2+(dz/A1[2])**2);
+     const ox=-C2[0]/A2[0],oy=-C2[1]/A2[1],oz=-C2[2]/A2[2],ux=dx/A2[0],uy=dy/A2[1],uz=dz/A2[2];
+     const qa=ux*ux+uy*uy+uz*uz,qb=2*(ox*ux+oy*uy+oz*uz),qc=ox*ox+oy*oy+oz*oz-1,disc=qb*qb-4*qa*qc;
+     const r2=disc>0?Math.max(0,(-qb+Math.sqrt(disc))/(2*qa)):0;
+     const h=Math.max(K-Math.abs(r1-r2),0)/K,r=Math.max(r1,r2)+h*h*K*.25;
+     pa.setXYZ(i,dx*r,dy*r,dz*r);}
+   hg.computeVertexNormals();P(hg,fur,0,0,0,head);}
+  // a point on the front of the head at (x,y) and its outward normal, so features follow the sliders
+  const onFace=(x,y,push=0)=>{let best=null;for(const[c,a]of[[[0,0,0],A1],[C2,A2]]){const k=1-((x-c[0])/a[0])**2-((y-c[1])/a[1])**2;if(k<=0)continue;
+      const z=c[2]+a[2]*Math.sqrt(k);if(!best||z>best.p.z)best={p:catV(x,y,z),n:catV((x-c[0])/a[0]**2,(y-c[1])/a[1]**2,(z-c[2])/a[2]**2).normalize()};}
+    if(!best)best={p:catV(x,y,0),n:catV(Math.sign(x)||0,0,0)};best.p.addScaledVector(best.n,push);return best;};
+  const facing=(m,n)=>m.quaternion.setFromUnitVectors(catV(0,0,1),n);
+
+  // ears: tall flat triangles, blue inside, leaning out; optional lashes along the inner edge
+  const ears=[];
+  for(const s of[-1,1]){const ew=.11*E.width,eh=.17*E.height,dep=.016;
+    const ear=new THREE.Group();const phi=E.spread;ear.position.set(s*A1[0]*Math.sin(phi)*.9,A1[1]*Math.cos(phi)*.9-.012,-.012);
+    ear.rotation.order='ZYX';ear.rotation.z=-s*(phi*.55+E.tilt);ear.rotation.y=-s*.3;ear.rotation.x=-.12;head.add(ear);ears.push(ear);
+    const tri=(w,h,ox=0)=>{const sh=new THREE.Shape();sh.moveTo(-w/2+ox,0);sh.lineTo(w/2+ox,0);sh.lineTo(s*w*.08+ox,h);sh.closePath();return sh;};
+    const outer=new THREE.ExtrudeGeometry(tri(ew,eh),{depth:dep,bevelEnabled:true,bevelSize:.004,bevelThickness:.004,bevelSegments:1});outer.translate(0,0,-dep/2);P(outer,fur,0,0,0,ear);
+    const ig=new THREE.ExtrudeGeometry(tri(ew*.66,eh*.74),{depth:.003,bevelEnabled:false});P(ig,inner,0,eh*.1,dep/2+.003,ear);
+    if(E.lashes)for(let k=0;k<4;k++){const u=.06+k*.075,lx=-s*(ew/2)*(1-u)+s*ew*.08*u,ly=eh*u; // fringe on the lower inner edge, poking toward the forehead
+      const l=P(new THREE.BoxGeometry(.0028,.017,.0028),fur,lx-s*.007,ly+.004,dep*.3,ear);l.rotation.z=s*(1.05+k*.08);}}
+
+  // eyes: round whites with tall slit pupils; cross pulls the pupils inward, lazyX drifts the cat's left eye
+  const eyes=[];
+  for(const s of[-1,1]){const f=onFace(s*Y.spacing,Y.height,-.004);
+    const eye=new THREE.Group();eye.position.copy(f.p);facing(eye,f.n);head.add(eye);eyes.push(eye);
+    const w=P(new THREE.SphereGeometry(Y.size,12,8),white,0,0,0,eye);w.scale.set(1,Y.round,.32);
+    const px=-s*Y.cross+(s>0?Y.lazyX:0);
+    const pp=P(new THREE.SphereGeometry(Y.size,10,8),pupil,px,0,Y.size*.27,eye);pp.scale.set(Y.pupilWidth*.62,Y.round*Y.pupilHeight,.1);}
+  // nose: a small orange triangle at the top of the muzzle; mouth: a tiny dark dot below it
+  {const f=onFace(0,N.height,.001),n=P(new THREE.ConeGeometry(.009*N.size,.012*N.size,3),nose,0,0,0,head);n.position.copy(f.p);n.rotation.set(Math.PI/2,0,Math.PI);n.scale.z=.6;
+   if(D.mouth.show){const m=onFace(0,N.height-.028,.0005),mo=P(new THREE.SphereGeometry(.0035,6,4),mouth,0,0,0,head);mo.position.copy(m.p);facing(mo,m.n);mo.scale.set(1.2,.8,.4);}}
+  // whiskers: two thin grey strokes per cheek running out past the head
+  if(W.show)for(const s of[-1,1])for(const k of[0,1]){const f=onFace(s*.055,N.height-.012-k*.016,.001),len=.075*W.length;
+    const w=P(new THREE.BoxGeometry(len,.0026,.0026),whisk,0,0,0,head);
+    w.position.copy(f.p).add(catV(s*len*.42,0,-len*.18));w.rotation.order='YXZ';w.rotation.y=s*.4;w.rotation.z=-s*(W.droop+(k?.12:-.04));}
+
+  let nextBlink=1.5+Math.random()*3,nextTwitch=3+Math.random()*4;
+  const r0=head.rotation.clone();
+  const anim=t=>{ // resting: a slow breath, blinks, an occasional ear twitch, the tail tip sways
+    head.rotation.x=r0.x+Math.sin(t*1.3)*.012;head.rotation.y=r0.y+Math.sin(t*.27)*.03;
+    let ey=1;if(t>nextBlink){const k=(t-nextBlink)/.2;if(k<1)ey=1-Math.sin(k*Math.PI)*.92;else nextBlink=t+2.5+Math.random()*4;}
+    for(const e of eyes)e.scale.y=ey;
+    let tw=0;if(t>nextTwitch){const k=(t-nextTwitch)/.25;if(k<1)tw=Math.sin(k*Math.PI)*.25;else nextTwitch=t+3+Math.random()*5;}
+    ears[0].rotation.x=-.12-tw;
+    tail.rotation.y=Math.sin(t*.8)*.035;};
+  kbCat={g,head,anim};
+}
+
 /* sepia photos of the salesman */
 function sepiaTex(kind){return canvasTex(256,320,(x,W,H)=>{const r=rng(900+kind);
   const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#cdb48a');g.addColorStop(1,'#8a6c45');x.fillStyle=g;x.fillRect(0,0,W,H);
@@ -1121,10 +1228,10 @@ function registerArea(){const H=1.02,x0=-1.48,x1=-.93,z0=3.05,z1=4.75;
   add(reg,boxGeo(.03,.18,.03),M.beige,0,.2,-.15);add(reg,boxGeo(.16,.06,.04),M.black,0,.3,-.15);
   const d=textPlane('$ 24.99',.13,.035,{bg:'#0b2a12',fg:'#5cff7a',border:null,res:64});d.position.set(0,.3,-.172);d.rotation.y=Math.PI;reg.add(d);
   add(scene,boxGeo(.18,.13,.22),M.beige,-1.16,H+.065,3.13);add(scene,boxGeo(.12,.005,.1),M.white,-1.16,H+.135,3.17);   // receipt printer
-  const mon=new THREE.Group();mon.position.set(-1.3,H,4.4);mon.rotation.y=-Math.PI/2+.4;scene.add(mon);                     // beige PC monitor
+  const mon=new THREE.Group();mon.position.set(-1.8,H,4.52);mon.rotation.y=3.04;scene.add(mon);                     // beige PC monitor on the back counter, facing the clerk
   add(mon,boxGeo(.34,.28,.3),M.beige,0,.2,0);add(mon,boxGeo(.28,.21,.01),new THREE.MeshBasicMaterial({color:0x1b3a5a}),0,.21,.151);add(mon,boxGeo(.2,.06,.2),M.beige,0,.03,0);
-  add(scene,boxGeo(.24,.025,.32),M.white,-1.9,H+.012,4.45);add(scene,boxGeo(.22,.02,.3),new THREE.MeshLambertMaterial({color:0xf2f0d0}),-1.88,H+.035,4.47);   // papers
-  add(scene,boxGeo(.12,.05,.2),M.black,-1.05,H+.025,4.62);   // phone
+  add(scene,boxGeo(.24,.025,.32),M.white,-2.13,H+.012,4.45);add(scene,boxGeo(.22,.02,.3),new THREE.MeshLambertMaterial({color:0xf2f0d0}),-2.11,H+.035,4.47);   // papers
+  add(scene,boxGeo(.12,.05,.2),M.black,-1.56,H+.025,4.64);   // phone
 }
 
 /* CRTs hung high on the right wall on angled brackets, tilted down at the aisle */
@@ -1167,6 +1274,7 @@ function buildStore(){
   magTable(1.75,-2.7);
   // shopkeeper behind the register; his old photos hang on the front wall behind him
   salesman(-1.75,4.0,Math.PI/2);block(-2.0,3.75,-1.5,4.25);
+  keyboardCat(-1.1,1.02,4.56,Math.PI/2,.55);   // the shop cat dozing on the PC keyboard on the counter, next to the monitor, facing customers
   [[2.3,1.95,1,.2],[2.3,1.45,3,.18]].forEach(([px,py,k,w])=>{const ph=framedPhoto(k,w);ph.rotation.y=Math.PI;ph.rotation.z=(k-2)*.012;ph.position.set(px,py,RZ-.012);scene.add(ph);});
   ['Left wall · bay 1 (front)','Left wall · bay 2','Left wall · bay 3','Left wall · bay 4','Left wall · bay 5','Left wall · bay 6','Left wall · bay 7','Left wall · bay 8 (back)',
    'Right wall · case 1 (front)','Right wall · case 2','Right wall · case 3','Right wall · case 4 (back)'].forEach((w,i)=>{if(sections[i])sections[i].where=w;});
@@ -1506,6 +1614,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
     const l=Math.hypot(f,s);if(l>1){f/=l;s/=l;}const sp=(keys.ShiftLeft||keys.ShiftRight?3.6:2.1)*dt;
     const sy=Math.sin(player.yaw),cy=Math.cos(player.yaw);const dx=(-sy*f+cy*s)*sp,dz=(-cy*f-sy*s)*sp;
     if(free(player.x+dx,player.z))player.x+=dx;if(free(player.x,player.z+dz))player.z+=dz;if(l>.05)player.bob+=dt*9*Math.min(1,l);}
+  if(kbCat)kbCat.anim(now/1000);
   if(clerk){const t=now/1000;clerk.anim(t);let a=Math.atan2(player.x-clerk.g.position.x,player.z-clerk.g.position.z)-clerk.ry;a=Math.atan2(Math.sin(a),Math.cos(a));a=Math.max(-1.15,Math.min(1.15,a));clerk.head.rotation.y+=(a-clerk.head.rotation.y)*Math.min(1,dt*3);}
   if(SF.active)SF.drive(now);else if(freeView)orbit.update();else{camera.position.set(player.x,1.6+Math.sin(player.bob)*.025,player.z);camera.rotation.set(player.pitch,player.yaw,0);}
   if(spDirty.size){for(const p of spDirty)if(atlas[p].sptex)atlas[p].sptex.needsUpdate=true;spDirty.clear();}
