@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Megason Shopkeeper</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dialkit@2.1.0/dist/vanilla/styles.css">
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#86acdc;font-family:Inter,system-ui,sans-serif}
   canvas{display:block}
@@ -18,7 +19,7 @@
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
-<div id="hud"><b>Shopkeeper model</b><div id="revs"><button data-rev="1">Rev 1 · full hair</button><button data-rev="2">Rev 2 · bald, lazy eye</button><button data-rev="3">Rev 3 · stern, swept hair</button></div><span>Drag to orbit · scroll to zoom · right-drag to pan</span></div>
+<div id="hud"><b>Shopkeeper model</b><div id="revs"><button data-rev="1">Rev 1 · full hair</button><button data-rev="2">Rev 2 · bald, lazy eye</button><button data-rev="3">Rev 3 · stern, swept hair</button></div><span>Drag to orbit · scroll to zoom · right-drag to pan<br>The DialKit panel (top right) edits rev 3</span></div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -26,7 +27,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // Standalone viewer for the store's shopkeeper. salesman() is written so it can be pasted into megason.html as is.
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x86acdc);
 const camera=new THREE.PerspectiveCamera(32,innerWidth/innerHeight,.01,50);camera.position.set(-.55,1.6,1.25);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});   // preserveDrawingBuffer lets DialKit capture version thumbnailsrenderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xffffff,0x887766,1.5));
 const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-2,3,3);scene.add(sun);
 const rim=new THREE.DirectionalLight(0xbfd4ff,.6);rim.position.set(2,2,-3);scene.add(rim);
@@ -39,6 +40,28 @@ function textPlane(text,w,h,{bg='#d7263d',fg='#fff',res=128}={}){const c=documen
   const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);x.fillStyle=fg;let fs=Math.round(c.height*.62);x.font=`700 ${fs}px Inter,sans-serif`;const tw=x.measureText(text).width;if(tw>c.width*.88){fs=Math.floor(fs*c.width*.88/tw);x.font=`700 ${fs}px Inter,sans-serif`;}x.textAlign='center';x.textBaseline='middle';x.fillText(text,c.width/2,c.height/2+1);
   const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t}));}
 let clerk=null;
+// any CSS colour (hex, rgb, hsl, oklch, display-p3...) -> THREE.Color, via a 1px canvas for formats three can't parse
+const _cc=document.createElement('canvas');_cc.width=_cc.height=1;const _cx=_cc.getContext('2d',{willReadFrequently:true});
+function col(v){const c=new THREE.Color();if(typeof v==='number')return c.set(v);if(/^(#|rgb|hsl)/i.test(v))return c.setStyle(v);
+  _cx.clearRect(0,0,1,1);_cx.fillStyle='#000';_cx.fillStyle=v;_cx.fillRect(0,0,1,1);const d=_cx.getImageData(0,0,1,1).data;return c.setRGB(d[0]/255,d[1]/255,d[2]/255,THREE.SRGBColorSpace);}
+
+// Rev 3 controls. Slider tuples are [default, min, max, step].
+const CFG3={
+  head:{width:[1,.8,1.2,.01],height:[1,.85,1.2,.01],depth:[1,.85,1.2,.01],jawWidth:[1,.7,1.3,.01],jawHeight:[1,.7,1.4,.01],facets:[12,6,32,1]},
+  skin:'#e9c4a6',
+  hair:{sides:true,color:'#a7a29b',shade:'#77726c',thickness:[.27,.1,.45,.01],sideburns:true,_collapsed:true},
+  ears:{size:[1,.5,1.6,.05],_collapsed:true},
+  eyes:{spacing:[.038,.026,.052,.001],height:[.14,.125,.155,.001],width:[1.35,.8,2,.05],open:[.92,.3,1.3,.02],iris:[.0058,.003,.0095,.0002],irisColor:'#5a3a22',lazyX:[.0045,-.008,.008,.0005],lazyY:[-.0025,-.008,.008,.0005]},
+  brows:{color:'#a7a29b',width:[.042,.02,.06,.001],thickness:[.008,.003,.016,.001],height:[.168,.15,.19,.001],tilt:[-.17,-.5,.5,.01]},
+  glasses:{show:true,radius:[.026,.015,.035,.001],wire:[.0016,.0008,.005,.0002],color:'#2a2a2a'},
+  nose:{size:[1,.6,1.5,.02],hump:[1,0,2,.05],hook:[1,0,2,.05],width:[.012,.006,.022,.001],wings:[1,0,1.6,.05]},
+  moustache:{show:true,color:'#9a958f',thickness:[1.5,.5,2.5,.05],width:[1,.6,1.6,.02],droop:[.14,-.3,.6,.01]},
+  mouth:{color:'#b07a68',width:[.03,.01,.05,.001],height:[.058,.045,.07,.001],curve:[0,-.4,.4,.02]},
+  shirt:{color:'#7f909c',badge:'MANAGER'},
+  scene:{background:'#86acdc',animate:true,_collapsed:true},
+};
+// the same config resolved to plain default values (used if DialKit can't load)
+const defaults=c=>Object.fromEntries(Object.entries(c).filter(([k])=>k[0]!=='_').map(([k,v])=>[k,Array.isArray(v)?v[0]:(v&&typeof v==='object')?defaults(v):v]));
 
 function salesman(x,z,ry){
   // shopkeeper in his 50s: grey store polo, glasses, grey moustache, hands resting on the counter
@@ -241,11 +264,11 @@ function salesman2(x,z,ry){
   clerk={g,body,head,ry,anim};
 }
 
-function salesman3(x,z,ry){
+function salesman3(x,z,ry,D){
   // shopkeeper in his 50s: grey store polo, glasses, grey moustache, hands resting on the counter
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
   const L=c=>new THREE.MeshLambertMaterial({color:c}),Ph=(c,s=12,sp=0x1c1c1c)=>new THREE.MeshPhongMaterial({color:c,shininess:s,specular:sp});
-  const skin=Ph(0xe9c4a6,6,0x111111),skinD=L(0xd6aa8c),polo=Ph(0x7f909c,4,0x0e0e0e),poloD=L(0x6c7c88),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
+  const skin=Ph(col(D.skin),6,0x111111),skinD=L(col(D.skin).multiplyScalar(.9)),polo=Ph(col(D.shirt.color),4,0x0e0e0e),poloD=L(col(D.shirt.color).multiplyScalar(.85)),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
     hairG=L(0xa8a39c),hairD=L(0x6d665f),white=Ph(0xf6f3ec,30,0x444444),iris=L(0x4b3324),dark=L(0x101010),frame=Ph(0x2b1f19,70,0x555555),lip=L(0xa9614f),
     belt=Ph(0x2a1d14,30,0x2a2a2a),gold=Ph(0xcdb47a,80,0x777766),lens=new THREE.MeshPhongMaterial({color:0xdfefff,transparent:true,opacity:.18,shininess:120,specular:0xffffff,depthWrite:false});
   const P=(geo,mat,px,py,pz,par=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);par.add(m);return m;};
@@ -274,7 +297,7 @@ function salesman3(x,z,ry){
     const c=P(cg,poloD,sx*.004,.57,.094,body);c.rotation.order='YXZ';c.rotation.y=sx*.4;c.rotation.x=-.5;}
   P(boxGeo(.032,.12,.006),poloD,0,.5,.133,body);for(let k=0;k<3;k++)P(new THREE.SphereGeometry(.0055,8,6),white,0,.548-k*.04,.137,body);
   const badge=new THREE.Group();badge.position.set(.09,.43,.121);badge.rotation.y=.38;body.add(badge);
-  P(boxGeo(.068,.032,.004),gold,0,0,0,badge);const nt=textPlane('MANAGER',.062,.026,{bg:'#f4f1e8',fg:'#1b1b1f',border:null,res:40});nt.position.z=.0025;badge.add(nt);
+  P(boxGeo(.068,.032,.004),gold,0,0,0,badge);const nt=textPlane(D.shirt.badge||' ',.062,.026,{bg:'#f4f1e8',fg:'#1b1b1f',border:null,res:40});nt.position.z=.0025;badge.add(nt);
 
   // ---- arms: two-bone IK so the hands rest flat on the counter in front of him
   const A=.29,B=.255,shY=.49;
@@ -298,12 +321,17 @@ function salesman3(x,z,ry){
   // ---- neck and head
   P(new THREE.CylinderGeometry(.05,.058,.08,14),skin,0,.58,0,body);
   const head=new THREE.Group();head.position.y=.6;head.scale.setScalar(.96);body.add(head);
-  // ---- face (rev 3): angular low-poly, bald with grey hair on the sides, rev 2's worried wide-eyed look, wire glasses, soft moustache; simple face, no wrinkles
-  const fl=c=>new THREE.MeshLambertMaterial({color:c,flatShading:true});
-  {const skin=fl(0xe9c4a6),hair=fl(0xa7a29b),hairD=fl(0x77726c),white=fl(0xf4f1ea),iris=fl(0x5a3a22),dark=fl(0x151515),wire=fl(0x2a2a2a),stache=fl(0x9a958f),lipC=fl(0xb07a68);
-  // longer, narrower skull and a squarer jaw, very low-res so the planes read
-  {const C1=[0,.137,0],A1=[.098,.128,.106],C2=[0,.058,.018],A2=[.084,.072,.09],K=.02;
-   const hg=new THREE.SphereGeometry(1,12,10),pa=hg.attributes.position;
+  // ---- face (rev 3), fully driven by D (the DialKit panel): angular low-poly, bald with grey sides, worried wide-eyed look,
+  // lazy left eye, wire glasses, eagle nose, soft moustache
+  const fl=c=>new THREE.MeshLambertMaterial({color:col(c),flatShading:true});
+  {const H=D.head,E=D.eyes,B=D.brows,G=D.glasses,N=D.nose,M=D.moustache,O=D.mouth,R=D.hair;
+  const skin=fl(D.skin),hair=fl(R.color),hairD=fl(R.shade),white=fl('#f4f1ea'),iris=fl(E.irisColor),wire=fl(G.color),stache=fl(M.color),lipC=fl(O.color);
+  const fz=(H.depth-1)*.106;                                   // move face details with the front of the skull
+  const Z=z=>z+fz;
+  // skull + jaw: smooth union of two ellipsoids, low-res so the planes read
+  const A1=[.098*H.width,.128*H.height,.106*H.depth];
+  {const C1=[0,.137,0],C2=[0,.058,.018],A2=[.084*H.jawWidth,.072*H.jawHeight,.09*H.depth],K=.02,seg=Math.round(H.facets);
+   const hg=new THREE.SphereGeometry(1,seg,Math.max(4,Math.round(seg*.8))),pa=hg.attributes.position;
    for(let i=0;i<pa.count;i++){const dx=pa.getX(i),dy=pa.getY(i),dz=pa.getZ(i);
      const r1=1/Math.sqrt((dx/A1[0])**2+(dy/A1[1])**2+(dz/A1[2])**2);
      const ox=(C1[0]-C2[0])/A2[0],oy=(C1[1]-C2[1])/A2[1],oz=(C1[2]-C2[2])/A2[2],ux=dx/A2[0],uy=dy/A2[1],uz=dz/A2[2];
@@ -312,32 +340,36 @@ function salesman3(x,z,ry){
      const h=Math.max(K-Math.abs(r1-r2),0)/K,r=Math.max(r1,r2)+h*h*K*.25;
      pa.setXYZ(i,dx*r,dy*r,dz*r);}
    hg.computeVertexNormals();P(hg,skin,C1[0],C1[1],C1[2],head);}
-  // bald crown, grey horseshoe of hair around the sides and back at ear height
-  const hairS=fl(0xa7a29b);hairS.side=THREE.DoubleSide;const hairDS=fl(0x77726c);hairDS.side=THREE.DoubleSide;
-  const band=P(new THREE.SphereGeometry(1,14,6,Math.PI*.82,Math.PI*1.36,Math.PI*.3,Math.PI*.27),hairS,0,.137,-.004,head);band.scale.set(.1,.132,.112);
-  const nape=P(new THREE.SphereGeometry(1,10,6,Math.PI*1.15,Math.PI*.7,Math.PI*.45,Math.PI*.25),hairDS,0,.132,-.006,head);nape.scale.set(.099,.13,.111);
-  for(const sx of[-1,1]){const tf=P(new THREE.SphereGeometry(.03,6,4),hair,sx*.09,.155,-.03,head);tf.scale.set(.45,1.1,1.3);
-    const sb=P(boxGeo(.008,.03,.02),hair,sx*.094,.128,.012,head);sb.rotation.y=sx*-.15;                     // short sideburns
-    const ear=P(new THREE.SphereGeometry(.032,6,4),skin,sx*.1,.118,-.006,head);ear.scale.set(.45,1.3,.8);}
-  // eagle nose: high bridge with a hump, tip hooking down, flared nostril wings (side profile extruded, chamfered)
-  {const pr=new THREE.Shape();[[.099,.139],[.115,.127],[.132,.115],[.141,.104],[.142,.095],[.135,.086],[.121,.083],[.104,.089]].forEach(([z,y],k)=>k?pr.lineTo(z,y):pr.moveTo(z,y));pr.closePath();
-   const ng=new THREE.ExtrudeGeometry(pr,{depth:.012,bevelEnabled:true,bevelSize:.0035,bevelThickness:.004,bevelSegments:1,curveSegments:1});
-   const nose=P(ng,skin,.006,0,0,head);nose.rotation.y=-Math.PI/2;
-   for(const sx of[-1,1]){const wg=P(new THREE.SphereGeometry(.0115,6,4),skin,sx*.013,.0905,.114,head);wg.scale.set(.9,.85,1.25);}}
-  // wide-open eyes like rev 2: white almond with a brown iris, no heavy lid; his left eye (+x) drifts outward and down.
-  // worried brows: inner ends raised
-  for(const sx of[-.038,.038]){const s=Math.sign(sx),lazy=sx>0;
-    const w=P(new THREE.SphereGeometry(.012,8,6),white,sx,.14,.098,head);w.scale.set(1.35,.92,.45);
-    P(new THREE.SphereGeometry(.0058,6,5),iris,sx+(lazy?.0045:0),.1395+(lazy?-.0025:0),.1028,head);
-    const br=P(boxGeo(.042,.008,.012),hair,sx,.168,.104,head);br.rotation.z=s*-.17;                     // inner ends raised: worried
-    P(new THREE.TorusGeometry(.026,.0016,5,28),wire,sx,.139,.111,head);                                   // thin wire rims
-    P(boxGeo(.08,.0022,.0022),wire,sx*2.15,.142,.064,head).rotation.y=Math.PI/2;
-    }
-  P(boxGeo(.026,.0025,.0025),wire,0,.143,.112,head);
-  // soft moustache, only a slight droop, and a relaxed straight mouth
-  for(const sx of[-1,1]){const m=P(new THREE.CylinderGeometry(.0135,.008,.046,6),stache,sx*.021,.076,.111,head);m.rotation.set(0,sx*-.25,sx*(Math.PI/2-.14));m.scale.z=.75;}
-  const mc=P(new THREE.SphereGeometry(.019,6,4),stache,0,.082,.114,head);mc.scale.set(1.6,.82,.75);
-  P(boxGeo(.03,.0045,.006),lipC,0,.058,.105,head);                                                       // straight deadpan mouth
+  // bald crown, grey horseshoe of hair around the sides and back
+  if(R.sides){const hs=fl(R.color);hs.side=THREE.DoubleSide;const hd=fl(R.shade);hd.side=THREE.DoubleSide;
+    const band=P(new THREE.SphereGeometry(1,14,6,Math.PI*.82,Math.PI*1.36,Math.PI*(.57-R.thickness),Math.PI*R.thickness),hs,0,.137,-.004,head);band.scale.set(A1[0]*1.02,A1[1]*1.03,A1[2]*1.06);
+    const nape=P(new THREE.SphereGeometry(1,10,6,Math.PI*1.15,Math.PI*.7,Math.PI*.45,Math.PI*.25),hd,0,.132,-.006,head);nape.scale.set(A1[0]*1.01,A1[1]*1.015,A1[2]*1.05);
+    for(const sx of[-1,1]){const tf=P(new THREE.SphereGeometry(.03,6,4),hair,sx*A1[0]*.92,.155,-.03,head);tf.scale.set(.45,1.1,1.3);
+      if(R.sideburns){const sb=P(boxGeo(.008,.03,.02),hair,sx*A1[0]*.96,.128,.012,head);sb.rotation.y=sx*-.15;}}}
+  for(const sx of[-1,1]){const ear=P(new THREE.SphereGeometry(.032*D.ears.size,6,4),skin,sx*A1[0]*1.02,.118,-.006,head);ear.scale.set(.45,1.3,.8);}
+  // eagle nose: side profile (bridge, hump, hook) extruded and chamfered, plus nostril wings
+  {const base=[[.099,.139],[.115,.127],[.132,.115],[.141,.104],[.142,.095],[.135,.086],[.121,.083],[.104,.089]];
+   const pts=base.map(([z,y],k)=>{let dz=z-.099,yy=y;
+     if(k===1||k===2)dz*=.6+.4*N.hump;
+     if(k>=4&&k<=6){yy-=(N.hook-1)*.006;if(k===4)dz*=.9+.1*N.hook;}
+     return[Z(.099+dz*N.size),.11+(yy-.11)*N.size];});
+   const pr=new THREE.Shape();pts.forEach(([z,y],k)=>k?pr.lineTo(z,y):pr.moveTo(z,y));pr.closePath();
+   const ng=new THREE.ExtrudeGeometry(pr,{depth:N.width,bevelEnabled:true,bevelSize:.0035,bevelThickness:.004,bevelSegments:1,curveSegments:1});
+   P(ng,skin,N.width/2,0,0,head).rotation.y=-Math.PI/2;
+   if(N.wings>0)for(const sx of[-1,1]){const wg=P(new THREE.SphereGeometry(.0115*N.wings,6,4),skin,sx*(N.width/2+.007),.0905,Z(.114),head);wg.scale.set(.9,.85,1.25);}}
+  // wide-open eyes with a brown iris; his left eye (+x) drifts by lazyX/lazyY. Brows: negative tilt = worried, positive = stern
+  for(const s of[-1,1]){const sx=s*E.spacing,lazy=s>0;
+    const w=P(new THREE.SphereGeometry(.012,8,6),white,sx,E.height,Z(.098),head);w.scale.set(E.width,E.open,.45);
+    P(new THREE.SphereGeometry(E.iris,6,5),iris,sx+(lazy?E.lazyX:0),E.height-.0005+(lazy?E.lazyY:0),Z(.1028),head);
+    const br=P(boxGeo(B.width,B.thickness,.012),fl(B.color),sx,B.height,Z(.104),head);br.rotation.z=s*B.tilt;
+    if(G.show){P(new THREE.TorusGeometry(G.radius,G.wire,5,28),wire,sx,E.height-.001,Z(.111),head);
+      P(boxGeo(.08,G.wire*1.4,G.wire*1.4),wire,s*A1[0]*.84,E.height+.002,Z(.064),head).rotation.y=Math.PI/2;}}
+  if(G.show){const gap=Math.max(.004,2*(E.spacing-G.radius));P(boxGeo(gap,G.wire*1.6,G.wire*1.6),wire,0,E.height+.003,Z(.112),head);}
+  // moustache: two halves and a centre piece; droop tilts the ends down
+  if(M.show){for(const sx of[-1,1]){const m=P(new THREE.CylinderGeometry(.009*M.thickness,.0053*M.thickness,.046*M.width,6),stache,sx*.021*M.width,.076,Z(.111),head);m.rotation.set(0,sx*-.25,sx*(Math.PI/2-M.droop));m.scale.z=.75;}
+    const mc=P(new THREE.SphereGeometry(.0127*M.thickness,6,4),stache,0,.082,Z(.114),head);mc.scale.set(1.6*M.width,.82,.75);}
+  // mouth: two halves so curve can turn it into a smile (+) or a frown (-)
+  for(const sx of[-1,1]){const l=P(boxGeo(O.width/2,.0045,.006),lipC,sx*O.width/4,O.height,Z(.105),head);l.rotation.z=sx*O.curve;}
   }
   const lids=[];
   let nextBlink=2+Math.random()*3;
@@ -350,12 +382,22 @@ function salesman3(x,z,ry){
 }
 
 // build every revision, show one (pick with the buttons or ?rev=1 / ?rev=2)
-const revs={};salesman(0,0,0);revs[1]=clerk;salesman2(0,0,0);revs[2]=clerk;salesman3(0,0,0);revs[3]=clerk;
-function showRev(n){for(const k in revs)revs[k].g.visible=String(k)===String(n);clerk=revs[n];document.querySelectorAll('#revs button').forEach(b=>b.classList.toggle('on',b.dataset.rev===String(n)));}
+const revs={};let curRev=3,animate=true;salesman(0,0,0);revs[1]=clerk;salesman2(0,0,0);revs[2]=clerk;
+function disposeTree(g){g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}});}
+function build3(D){if(revs[3]){scene.remove(revs[3].g);disposeTree(revs[3].g);}salesman3(0,0,0,D);revs[3]=clerk;showRev(curRev);
+  scene.background.copy(col(D.scene.background));animate=D.scene.animate!==false;}
+build3(defaults(CFG3));
+// DialKit panel: every change rebuilds rev 3 (batched to one rebuild per frame). Values persist in this browser.
+try{const {createDialKit,createDialRoot}=await import('https://cdn.jsdelivr.net/npm/dialkit@2.1.0/dist/vanilla/index.js');
+  createDialRoot({position:'top-right',theme:'dark'});
+  const kit=createDialKit('Shopkeeper rev 3',CFG3,{id:'shopkeeper-rev3',persist:true});
+  let pending=null;kit.subscribe(v=>{const first=pending===null;pending=v;if(first)requestAnimationFrame(()=>{const d=pending;pending=null;build3(d);});});
+}catch(err){console.warn('DialKit did not load; showing rev 3 with default values.',err);}
+function showRev(n){curRev=Number(n);for(const k in revs)revs[k].g.visible=String(k)===String(n);clerk=revs[n];document.querySelectorAll('#revs button').forEach(b=>b.classList.toggle('on',b.dataset.rev===String(n)));}
 document.querySelectorAll('#revs button').forEach(b=>b.onclick=()=>showRev(b.dataset.rev));
 showRev(new URLSearchParams(location.search).get('rev')||3);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
-renderer.setAnimationLoop(t=>{clerk.anim(t/1000);controls.update();renderer.render(scene,camera);});
+renderer.setAnimationLoop(t=>{if(animate)clerk.anim(t/1000);controls.update();renderer.render(scene,camera);});
 </script>
 </body>
 </html>
