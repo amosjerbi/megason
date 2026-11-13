@@ -36,7 +36,7 @@ const controls=new OrbitControls(camera,renderer.domElement);controls.target.set
 // helpers the model expects from megason.html
 const boxGeo=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
 function textPlane(text,w,h,{bg='#d7263d',fg='#fff',res=128}={}){const c=document.createElement('canvas');c.width=Math.round(w*res*40);c.height=Math.round(h*res*40);
-  const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);x.fillStyle=fg;x.font=`700 ${Math.round(c.height*.62)}px Inter,sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(text,c.width/2,c.height/2+1);
+  const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);x.fillStyle=fg;let fs=Math.round(c.height*.62);x.font=`700 ${fs}px Inter,sans-serif`;const tw=x.measureText(text).width;if(tw>c.width*.88){fs=Math.floor(fs*c.width*.88/tw);x.font=`700 ${fs}px Inter,sans-serif`;}x.textAlign='center';x.textBaseline='middle';x.fillText(text,c.width/2,c.height/2+1);
   const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t}));}
 let clerk=null;
 
@@ -65,14 +65,13 @@ function salesman(x,z,ry){
   const bl=P(new THREE.CylinderGeometry(.199,.199,.045,28,1,true),belt,0,.012,0,body);bl.scale.z=ZS+.035;
   P(boxGeo(.05,.036,.012),gold,0,.012,.131,body);
   for(const sx of[-1,1]){const s=P(new THREE.SphereGeometry(.078,16,12),polo,sx*.182,.5,0,body);s.scale.set(1,.85,.9);}
-  // collar, placket and buttons, embroidered logo, name badge
+  // collar, placket and buttons, name badge
   const back=P(new THREE.TorusGeometry(.066,.016,8,24,Math.PI*1.25),poloD,0,.578,-.005,body);back.rotation.order='YXZ';back.rotation.x=Math.PI/2;back.rotation.y=Math.PI*.625+Math.PI/2;back.scale.set(1,1.15,1);
   for(const sx of[-1,1]){ // collar points: flat triangles from the neckline down onto the chest
     const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(sx*.085,.004);sh.lineTo(sx*.034,-.078);sh.lineTo(0,0);
     const cg=new THREE.ExtrudeGeometry(sh,{depth:.008,bevelEnabled:false});
     const c=P(cg,poloD,sx*.004,.57,.094,body);c.rotation.order='YXZ';c.rotation.y=sx*.4;c.rotation.x=-.5;}
   P(boxGeo(.032,.12,.006),poloD,0,.5,.133,body);for(let k=0;k<3;k++)P(new THREE.SphereGeometry(.0055,8,6),white,0,.548-k*.04,.137,body);
-  const logo=textPlane('MEGASON',.075,.019,{bg:'#7f909c',fg:'#ffffff',border:null,res:40});logo.position.set(-.088,.45,.12);logo.rotation.y=-.38;body.add(logo);
   const badge=new THREE.Group();badge.position.set(.09,.43,.121);badge.rotation.y=.38;body.add(badge);
   P(boxGeo(.068,.032,.004),gold,0,0,0,badge);const nt=textPlane('MANAGER',.062,.026,{bg:'#f4f1e8',fg:'#1b1b1f',border:null,res:40});nt.position.z=.0025;badge.add(nt);
 
@@ -166,14 +165,13 @@ function salesman2(x,z,ry){
   const bl=P(new THREE.CylinderGeometry(.199,.199,.045,28,1,true),belt,0,.012,0,body);bl.scale.z=ZS+.035;
   P(boxGeo(.05,.036,.012),gold,0,.012,.131,body);
   for(const sx of[-1,1]){const s=P(new THREE.SphereGeometry(.078,16,12),polo,sx*.182,.5,0,body);s.scale.set(1,.85,.9);}
-  // collar, placket and buttons, embroidered logo, name badge
+  // collar, placket and buttons, name badge
   const back=P(new THREE.TorusGeometry(.066,.016,8,24,Math.PI*1.25),poloD,0,.578,-.005,body);back.rotation.order='YXZ';back.rotation.x=Math.PI/2;back.rotation.y=Math.PI*.625+Math.PI/2;back.scale.set(1,1.15,1);
   for(const sx of[-1,1]){ // collar points: flat triangles from the neckline down onto the chest
     const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(sx*.085,.004);sh.lineTo(sx*.034,-.078);sh.lineTo(0,0);
     const cg=new THREE.ExtrudeGeometry(sh,{depth:.008,bevelEnabled:false});
     const c=P(cg,poloD,sx*.004,.57,.094,body);c.rotation.order='YXZ';c.rotation.y=sx*.4;c.rotation.x=-.5;}
   P(boxGeo(.032,.12,.006),poloD,0,.5,.133,body);for(let k=0;k<3;k++)P(new THREE.SphereGeometry(.0055,8,6),white,0,.548-k*.04,.137,body);
-  const logo=textPlane('MEGASON',.075,.019,{bg:'#7f909c',fg:'#ffffff',border:null,res:40});logo.position.set(-.088,.45,.12);logo.rotation.y=-.38;body.add(logo);
   const badge=new THREE.Group();badge.position.set(.09,.43,.121);badge.rotation.y=.38;body.add(badge);
   P(boxGeo(.068,.032,.004),gold,0,0,0,badge);const nt=textPlane('MANAGER',.062,.026,{bg:'#f4f1e8',fg:'#1b1b1f',border:null,res:40});nt.position.z=.0025;badge.add(nt);
 
