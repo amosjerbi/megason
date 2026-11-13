@@ -319,9 +319,11 @@ function salesman3(x,z,ry){
   for(const sx of[-1,1]){const tf=P(new THREE.SphereGeometry(.03,6,4),hair,sx*.09,.155,-.03,head);tf.scale.set(.45,1.1,1.3);
     const sb=P(boxGeo(.008,.03,.02),hair,sx*.094,.128,.012,head);sb.rotation.y=sx*-.15;                     // short sideburns
     const ear=P(new THREE.SphereGeometry(.032,6,4),skin,sx*.1,.118,-.006,head);ear.scale.set(.45,1.3,.8);}
-  // straight angular nose
-  const nr=P(new THREE.ConeGeometry(.018,.05,4),skin,0,.112,.112,head);nr.rotation.set(-.32,Math.PI/4,0);nr.scale.set(1,1,.8);
-  const nt=P(new THREE.SphereGeometry(.0135,5,4),skin,0,.092,.122,head);nt.scale.set(1.15,.9,1);
+  // eagle nose: high bridge with a hump, tip hooking down, flared nostril wings (side profile extruded, chamfered)
+  {const pr=new THREE.Shape();[[.099,.139],[.115,.127],[.132,.115],[.141,.104],[.142,.095],[.135,.086],[.121,.083],[.104,.089]].forEach(([z,y],k)=>k?pr.lineTo(z,y):pr.moveTo(z,y));pr.closePath();
+   const ng=new THREE.ExtrudeGeometry(pr,{depth:.012,bevelEnabled:true,bevelSize:.0035,bevelThickness:.004,bevelSegments:1,curveSegments:1});
+   const nose=P(ng,skin,.006,0,0,head);nose.rotation.y=-Math.PI/2;
+   for(const sx of[-1,1]){const wg=P(new THREE.SphereGeometry(.0115,6,4),skin,sx*.013,.0905,.114,head);wg.scale.set(.9,.85,1.25);}}
   // wide-open eyes like rev 2: white almond with a brown iris, no heavy lid; his left eye (+x) drifts outward and down.
   // worried brows: inner ends raised
   for(const sx of[-.038,.038]){const s=Math.sign(sx),lazy=sx>0;
