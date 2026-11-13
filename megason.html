@@ -102,6 +102,25 @@
   #info .meta{font-family:"Press Start 2P",monospace;font-size:9px;color:#9ad1ff;line-height:1.8}
   #info .price{font-family:"Press Start 2P",monospace;font-size:14px;color:#ffd23f;margin:8px 0}
   #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(15,12,30,.92);border:1px solid #ffd23f;padding:10px 14px;border-radius:10px;font-size:13px;z-index:30;display:none;max-width:90vw;text-align:center}
+  /* game details popup: same palette as the settings popup */
+  #info{background:rgba(6,7,20,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+  #info .box{background:linear-gradient(160deg,#1b1f49 0%,#12153a 55%,#0f1230 100%);border:1px solid rgba(130,150,255,.38);border-radius:22px;padding:24px 28px 28px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);color:#fff}
+  #info #infoHead{margin:0 0 20px;padding:0 56px 16px 0;border-bottom:1px solid rgba(140,160,255,.16)}
+  #info #infoHead h2{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:28px;letter-spacing:-.02em;line-height:1.2;margin:0 0 8px;color:#fff}
+  #info #infoHead .meta{font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:500;line-height:1.6;letter-spacing:.02em;color:#aeb4d6}
+  #info #infoHead .price{position:relative;display:inline-block;margin:14px 0 0;padding:17px 28px;min-width:130px;text-align:center;background:#fbfaf7;color:#4a4a4a;font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:500;letter-spacing:.01em;line-height:1;transform:rotate(-2deg);filter:drop-shadow(0 6px 12px rgba(0,0,0,.45));
+    background-image:linear-gradient(#d4563a,#d4563a),linear-gradient(#d4563a,#d4563a);background-size:calc(100% - 26px) 3px,calc(100% - 26px) 3px;background-position:50% 8px,50% calc(100% - 8px);background-repeat:no-repeat;
+    -webkit-mask:radial-gradient(circle 6px at 50% 0,#0000 97%,#000) top/100% 51% no-repeat,radial-gradient(circle 6px at 50% 100%,#0000 97%,#000) bottom/100% 51% no-repeat;mask:radial-gradient(circle 6px at 50% 0,#0000 97%,#000) top/100% 51% no-repeat,radial-gradient(circle 6px at 50% 100%,#0000 97%,#000) bottom/100% 51% no-repeat}
+  #info #infoX{top:18px;right:18px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:#fff;font-size:0}
+  #info #infoX:hover{background:rgba(255,255,255,.1)}
+  #info #infoX svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+  #info #infoShotsCap{display:flex;align-items:center;margin:0 0 12px;padding-left:12px;border-left:3px solid #ffd23f;font-family:Inter,system-ui,sans-serif;font-size:17px;font-weight:700;letter-spacing:0;color:#fff;line-height:1.2}
+  #info #infoShots{gap:10px}
+  #info #infoShots img{border-radius:12px;border:1px solid rgba(140,160,255,.16);transition:transform .15s,border-color .15s}
+  #info #infoShots img:hover{transform:translateY(-2px);border-color:rgba(90,162,255,.6)}
+  #info #infoArt canvas,#info #infoArt img{border-radius:10px}
+  #info #infoDisc .cap{font-family:Inter,system-ui,sans-serif;font-size:12px;font-weight:500;color:#aeb4d6;margin-top:8px}
+  @media (max-width:640px){#info .box{padding:18px}#info #infoHead h2{font-size:22px}#info #infoX{top:12px;right:12px;width:38px;height:38px}}
   #settings{--acc:#3d8bff;--acc2:#2c6cf6;--line:rgba(140,160,255,.16);--mut:#aeb4d6;position:fixed;inset:0;background:rgba(6,7,20,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:25;padding:16px;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
   #settings>.box{position:relative;display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;width:min(1240px,100%);max-height:100%;overflow:auto;background:linear-gradient(160deg,#1b1f49 0%,#12153a 55%,#0f1230 100%);border:1px solid rgba(130,150,255,.38);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);color:#fff;font-size:14px;line-height:1.5}
   #settings .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -242,7 +261,7 @@
 <div id="touchhint">Left thumb: walk · Right side: look · Tap a box to inspect</div>
 
 <div id="info"><div class="box">
-  <button id="infoX" aria-label="Close">×</button>
+  <button id="infoX" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
   <div id="infoHead">
     <h2 id="infoTitle"></h2>
     <div class="meta" id="infoMeta"></div>
@@ -250,7 +269,7 @@
   </div>
   <div id="infoGrid">
     <div id="infoLeft"><div id="infoArt"></div><div id="infoDisc"></div></div>
-    <div id="infoRight"><div id="infoShotsCap">GAMEPLAY</div><div id="infoShots"></div></div>
+    <div id="infoRight"><div id="infoShotsCap">Gameplay</div><div id="infoShots"></div></div>
   </div>
   <div id="infoRestock"><div class="meta" style="margin-top:6px">RESTOCK <span id="infoSecName"></span> WITH:</div><select id="infoSel"></select> <button class="btn small" id="infoShuffle">⟳ SHUFFLE</button></div>
   <div id="infoLink"><input id="infoUrl" placeholder="Paste a cover image link" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn small" id="infoUseUrl">USE LINK</button></div>
@@ -1183,7 +1202,7 @@ function showMedia(c){const d=$('infoDisc'),g=$('infoShots'),cap=$('infoShotsCap
   $('info').classList.toggle('media',!!m);
   if(!m){d.style.display=g.style.display=cap.style.display='none';return;}
   const im=fn=>{const i=new Image();i.alt='';i.src=PM.base+fn;i.onerror=()=>{if(!i.dataset.p){i.dataset.p='1';i.src=proxied(PM.base+fn);}else i.remove();};return i;};
-  if(m.m){d.appendChild(im(m.m));const t=document.createElement('div');t.className='cap';t.textContent=DISC_SYS.has(c.p)?'DISC':'CARTRIDGE';d.appendChild(t);d.style.display='';}else d.style.display='none';
+  if(m.m){d.appendChild(im(m.m));const t=document.createElement('div');t.className='cap';t.textContent=DISC_SYS.has(c.p)?'Disc':'Cartridge';d.appendChild(t);d.style.display='';}else d.style.display='none';
   if(m.s&&m.s.length){m.s.forEach(fn=>{const i=im(fn);i.onclick=()=>{const v=$('shotView');v.querySelector('img').src=i.src;v.style.display='flex';};g.appendChild(i);});g.style.display=cap.style.display='';}else g.style.display=cap.style.display='none';}
 $('shotView').onclick=()=>{$('shotView').style.display='none';};
 function openInfo(c,secId){if(document.pointerLockElement)document.exitPointerLock();infoCover=c;$('infoLink').style.display='';$('infoUrl').value=c.url||'';
