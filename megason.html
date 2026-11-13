@@ -889,11 +889,19 @@ function plant(x,z){const g=new THREE.Group();g.position.set(x,0,z);scene.add(g)
 /* ---------------- salesman (flat-shaded low-poly) ---------------- */
 let clerk=null;
 const CLERK_LINES=['"Looking for anything in particular?"','"That one\'s boxed and complete."','"Trade-ins are two for one this week."','"Been running this place since \'94."','"Careful with the imports, they\'re rare."'];
-function salesman(x,z,ry){
+/* ---------------- shopkeeper ----------------
+   Built in shopkeeper.html (rev 3) and tuned there with DialKit; SHOPKEEPER holds the chosen look (saved version V2).
+   To change him, tune rev 3 in shopkeeper.html, copy the parameters and paste them here. */
+const SHOPKEEPER={"head":{"width":1.14,"height":0.85,"depth":1,"jawWidth":1.12,"jawHeight":0.87,"facets":10},"skin":"#e9c4a6","hair":{"sides":true,"color":"#a7a29b","shade":"#77726c","thickness":0.27,"sideburns":true},"ears":{"size":1},"eyes":{"spacing":0.046,"height":0.136,"width":1.6,"open":1,"iris":0.009,"irisColor":"#6d85cb","lazyX":0.0055,"lazyY":0.001},"brows":{"color":"#a7a29b","width":0.042,"thickness":0.008,"height":0.168,"tilt":-0.17},"glasses":{"show":true,"radius":0.031,"wire":0.0026,"color":"#2a2a2a"},"nose":{"size":0.9,"hump":1.4,"hook":0.2,"width":0.02,"wings":1.2},"moustache":{"show":true,"color":"#9a958f","thickness":2.05,"width":1.32,"droop":-0.08},"mouth":{"color":"#b07a68","width":0.03,"height":0.058,"curve":0},"shirt":{"color":"#7f909c","badge":"MANAGER"}};
+// any CSS colour -> THREE.Color (hex/rgb/hsl directly, other formats via a 1px canvas)
+const _skc=document.createElement('canvas');_skc.width=_skc.height=1;const _skx=_skc.getContext('2d',{willReadFrequently:true});
+function skCol(v){const c=new THREE.Color();if(typeof v==='number')return c.set(v);if(/^(#|rgb|hsl)/i.test(v))return c.setStyle(v);
+  _skx.clearRect(0,0,1,1);_skx.fillStyle='#000';_skx.fillStyle=v;_skx.fillRect(0,0,1,1);const d=_skx.getImageData(0,0,1,1).data;return c.setRGB(d[0]/255,d[1]/255,d[2]/255,THREE.SRGBColorSpace);}
+function salesman(x,z,ry,D=SHOPKEEPER){
   // shopkeeper in his 50s: grey store polo, glasses, grey moustache, hands resting on the counter
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
   const L=c=>new THREE.MeshLambertMaterial({color:c}),Ph=(c,s=12,sp=0x1c1c1c)=>new THREE.MeshPhongMaterial({color:c,shininess:s,specular:sp});
-  const skin=Ph(0xcf9f80,6,0x111111),skinD=L(0xb98266),polo=Ph(0x7f909c,4,0x0e0e0e),poloD=L(0x6c7c88),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
+  const skin=Ph(skCol(D.skin),6,0x111111),skinD=L(skCol(D.skin).multiplyScalar(.9)),polo=Ph(skCol(D.shirt.color),4,0x0e0e0e),poloD=L(skCol(D.shirt.color).multiplyScalar(.85)),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
     hairG=L(0xa8a39c),hairD=L(0x6d665f),white=Ph(0xf6f3ec,30,0x444444),iris=L(0x4b3324),dark=L(0x101010),frame=Ph(0x2b1f19,70,0x555555),lip=L(0xa9614f),
     belt=Ph(0x2a1d14,30,0x2a2a2a),gold=Ph(0xcdb47a,80,0x777766),lens=new THREE.MeshPhongMaterial({color:0xdfefff,transparent:true,opacity:.18,shininess:120,specular:0xffffff,depthWrite:false});
   const P=(geo,mat,px,py,pz,par=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);par.add(m);return m;};
@@ -914,13 +922,15 @@ function salesman(x,z,ry){
   const bl=P(new THREE.CylinderGeometry(.199,.199,.045,28,1,true),belt,0,.012,0,body);bl.scale.z=ZS+.035;
   P(boxGeo(.05,.036,.012),gold,0,.012,.131,body);
   for(const sx of[-1,1]){const s=P(new THREE.SphereGeometry(.078,16,12),polo,sx*.182,.5,0,body);s.scale.set(1,.85,.9);}
-  // collar, placket and buttons, embroidered logo, name badge
+  // collar, placket and buttons, name badge
   const back=P(new THREE.TorusGeometry(.066,.016,8,24,Math.PI*1.25),poloD,0,.578,-.005,body);back.rotation.order='YXZ';back.rotation.x=Math.PI/2;back.rotation.y=Math.PI*.625+Math.PI/2;back.scale.set(1,1.15,1);
-  for(const sx of[-1,1]){const c=P(boxGeo(.06,.012,.07),poloD,sx*.038,.572,.085,body);c.rotation.set(-.55,sx*-.55,sx*.3);}
+  for(const sx of[-1,1]){ // collar points: flat triangles from the neckline down onto the chest
+    const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(sx*.085,.004);sh.lineTo(sx*.034,-.078);sh.lineTo(0,0);
+    const cg=new THREE.ExtrudeGeometry(sh,{depth:.008,bevelEnabled:false});
+    const c=P(cg,poloD,sx*.004,.57,.094,body);c.rotation.order='YXZ';c.rotation.y=sx*.4;c.rotation.x=-.5;}
   P(boxGeo(.032,.12,.006),poloD,0,.5,.133,body);for(let k=0;k<3;k++)P(new THREE.SphereGeometry(.0055,8,6),white,0,.548-k*.04,.137,body);
-  const logo=textPlane('MEGASON',.075,.019,{bg:'#7f909c',fg:'#ffffff',border:null,res:40});logo.position.set(-.088,.45,.12);logo.rotation.y=-.38;body.add(logo);
   const badge=new THREE.Group();badge.position.set(.09,.43,.121);badge.rotation.y=.38;body.add(badge);
-  P(boxGeo(.068,.032,.004),gold,0,0,0,badge);const nt=textPlane('MANAGER',.062,.026,{bg:'#f4f1e8',fg:'#1b1b1f',border:null,res:40});nt.position.z=.0025;badge.add(nt);
+  P(boxGeo(.068,.032,.004),gold,0,0,0,badge);const nt=textPlane(D.shirt.badge||' ',.062,.026,{bg:'#f4f1e8',fg:'#1b1b1f',border:null,res:40});nt.position.z=.0025;badge.add(nt);
 
   // ---- arms: two-bone IK so the hands rest flat on the counter in front of him
   const A=.29,B=.255,shY=.49;
@@ -944,33 +954,55 @@ function salesman(x,z,ry){
   // ---- neck and head
   P(new THREE.CylinderGeometry(.05,.058,.08,14),skin,0,.58,0,body);
   const head=new THREE.Group();head.position.y=.6;head.scale.setScalar(.96);body.add(head);
-  // face from the original model (megason copy.html)
-  const sm=c=>new THREE.MeshLambertMaterial({color:c});
-  {const skin=sm(0xcf9f80),hair=sm(0x4a4440),grey=sm(0x8f8b86),dark=sm(0x18181a);
-  // skull + jaw as ONE smooth surface: same two ellipsoids as before, joined with a smooth union so there is no crease
-  {const C1=[0,.13,0],A1=[.108*.96,.108*1.16,.108*1.04],C2=[0,.065,.012],A2=[.09,.09*.75,.09*.98],K=.022;
-   const hg=new THREE.SphereGeometry(1,64,48),pa=hg.attributes.position;
+  // ---- face (rev 3), fully driven by D (the DialKit panel): angular low-poly, bald with grey sides, worried wide-eyed look,
+  // lazy left eye, wire glasses, eagle nose, soft moustache
+  const fl=c=>new THREE.MeshLambertMaterial({color:skCol(c),flatShading:true});
+  {const H=D.head,E=D.eyes,B=D.brows,G=D.glasses,N=D.nose,M=D.moustache,O=D.mouth,R=D.hair;
+  const skin=fl(D.skin),hair=fl(R.color),hairD=fl(R.shade),white=fl('#f4f1ea'),iris=fl(E.irisColor),wire=fl(G.color),stache=fl(M.color),lipC=fl(O.color);
+  const fz=(H.depth-1)*.106;                                   // move face details with the front of the skull
+  const Z=z=>z+fz;
+  // skull + jaw: smooth union of two ellipsoids, low-res so the planes read
+  const A1=[.098*H.width,.128*H.height,.106*H.depth];
+  {const C1=[0,.137,0],C2=[0,.058,.018],A2=[.084*H.jawWidth,.072*H.jawHeight,.09*H.depth],K=.02,seg=Math.round(H.facets);
+   const hg=new THREE.SphereGeometry(1,seg,Math.max(4,Math.round(seg*.8))),pa=hg.attributes.position;
    for(let i=0;i<pa.count;i++){const dx=pa.getX(i),dy=pa.getY(i),dz=pa.getZ(i);
-     const r1=1/Math.sqrt((dx/A1[0])**2+(dy/A1[1])**2+(dz/A1[2])**2);              // ray from the skull centre to the skull surface
+     const r1=1/Math.sqrt((dx/A1[0])**2+(dy/A1[1])**2+(dz/A1[2])**2);
      const ox=(C1[0]-C2[0])/A2[0],oy=(C1[1]-C2[1])/A2[1],oz=(C1[2]-C2[2])/A2[2],ux=dx/A2[0],uy=dy/A2[1],uz=dz/A2[2];
      const qa=ux*ux+uy*uy+uz*uz,qb=2*(ox*ux+oy*uy+oz*uz),qc=ox*ox+oy*oy+oz*oz-1,disc=qb*qb-4*qa*qc;
-     const r2=disc>0?Math.max(0,(-qb+Math.sqrt(disc))/(2*qa)):0;                    // same ray to the jaw surface
-     const h=Math.max(K-Math.abs(r1-r2),0)/K,r=Math.max(r1,r2)+h*h*K*.25;          // smooth max = soft blend
+     const r2=disc>0?Math.max(0,(-qb+Math.sqrt(disc))/(2*qa)):0;
+     const h=Math.max(K-Math.abs(r1-r2),0)/K,r=Math.max(r1,r2)+h*h*K*.25;
      pa.setXYZ(i,dx*r,dy*r,dz*r);}
    hg.computeVertexNormals();P(hg,skin,C1[0],C1[1],C1[2],head);}
-  // receding hair, grey at the temples
-  const cap=P(new THREE.SphereGeometry(.114,18,12,0,Math.PI*2,0,Math.PI*.46),hair,0,.135,-.012,head);cap.scale.set(.98,1.12,1.06);cap.rotation.x=-.8;
-  for(const sx of[-1,1]){const tp=P(new THREE.SphereGeometry(.05,10,8),grey,sx*.085,.15,-.03,head);tp.scale.set(.5,1,1.2);
-    const ear=P(new THREE.SphereGeometry(.024,8,6),skin,sx*.103,.115,0,head);ear.scale.set(.5,1.15,.8);}
-  const nose=P(new THREE.SphereGeometry(.02,8,6),skin,0,.105,.112,head);nose.scale.set(.95,1.35,1);
-  for(const sx of[-.041,.041]){const e=P(new THREE.SphereGeometry(.0105,8,6),dark,sx,.14,.098,head);e.scale.set(1.3,.75,.5);
-    P(boxGeo(.04,.009,.009),hair,sx,.166,.099,head).rotation.z=sx>0?-.12:.12;
-    P(new THREE.TorusGeometry(.024,.0028,6,18),dark,sx,.14,.106,head);                        // glasses
-    P(boxGeo(.07,.004,.004),dark,sx*2.1,.142,.06,head).rotation.y=Math.PI/2;}
-  P(boxGeo(.034,.004,.004),dark,0,.143,.108,head);
-  const mo=P(new THREE.CapsuleGeometry(.011,.05,3,8),grey,0,.078,.104,head);mo.rotation.z=Math.PI/2;       // moustache
-  P(boxGeo(.036,.005,.006),sm(0x8e5446),0,.058,.1,head);
-  for(const sx of[-1,1])P(boxGeo(.004,.03,.004),sm(0xb58468),sx*.03,.085,.1,head).rotation.z=sx*.35;  // smile lines
+  // bald crown, grey horseshoe of hair around the sides and back
+  if(R.sides){const hs=fl(R.color);hs.side=THREE.DoubleSide;const hd=fl(R.shade);hd.side=THREE.DoubleSide;
+    const band=P(new THREE.SphereGeometry(1,14,6,Math.PI*.82,Math.PI*1.36,Math.PI*(.57-R.thickness),Math.PI*R.thickness),hs,0,.137,-.004,head);band.scale.set(A1[0]*1.02,A1[1]*1.03,A1[2]*1.06);
+    const nape=P(new THREE.SphereGeometry(1,10,6,Math.PI*1.15,Math.PI*.7,Math.PI*.45,Math.PI*.25),hd,0,.132,-.006,head);nape.scale.set(A1[0]*1.01,A1[1]*1.015,A1[2]*1.05);
+    for(const sx of[-1,1]){const tf=P(new THREE.SphereGeometry(.03,6,4),hair,sx*A1[0]*.92,.155,-.03,head);tf.scale.set(.45,1.1,1.3);
+      if(R.sideburns){const sb=P(boxGeo(.008,.03,.02),hair,sx*A1[0]*.96,.128,.012,head);sb.rotation.y=sx*-.15;}}}
+  for(const sx of[-1,1]){const ear=P(new THREE.SphereGeometry(.032*D.ears.size,6,4),skin,sx*A1[0]*1.02,.118,-.006,head);ear.scale.set(.45,1.3,.8);}
+  // eagle nose: side profile (bridge, hump, hook) extruded and chamfered, plus nostril wings
+  {const base=[[.099,.139],[.115,.127],[.132,.115],[.141,.104],[.142,.095],[.135,.086],[.121,.083],[.104,.089]];
+   const pts=base.map(([z,y],k)=>{let dz=z-.099,yy=y;
+     if(k===1||k===2)dz*=.6+.4*N.hump;
+     if(k>=4&&k<=6){yy-=(N.hook-1)*.006;if(k===4)dz*=.9+.1*N.hook;}
+     return[Z(.099+dz*N.size),.11+(yy-.11)*N.size];});
+   const pr=new THREE.Shape();pts.forEach(([z,y],k)=>k?pr.lineTo(z,y):pr.moveTo(z,y));pr.closePath();
+   const ng=new THREE.ExtrudeGeometry(pr,{depth:N.width,bevelEnabled:true,bevelSize:.0035,bevelThickness:.004,bevelSegments:1,curveSegments:1});
+   P(ng,skin,N.width/2,0,0,head).rotation.y=-Math.PI/2;
+   if(N.wings>0)for(const sx of[-1,1]){const wg=P(new THREE.SphereGeometry(.0115*N.wings,6,4),skin,sx*(N.width/2+.007),.0905,Z(.114),head);wg.scale.set(.9,.85,1.25);}}
+  // wide-open eyes with a brown iris; his left eye (+x) drifts by lazyX/lazyY. Brows: negative tilt = worried, positive = stern
+  for(const s of[-1,1]){const sx=s*E.spacing,lazy=s>0;
+    const w=P(new THREE.SphereGeometry(.012,8,6),white,sx,E.height,Z(.098),head);w.scale.set(E.width,E.open,.45);
+    P(new THREE.SphereGeometry(E.iris,6,5),iris,sx+(lazy?E.lazyX:0),E.height-.0005+(lazy?E.lazyY:0),Z(.1028),head);
+    const br=P(boxGeo(B.width,B.thickness,.012),fl(B.color),sx,B.height,Z(.104),head);br.rotation.z=s*B.tilt;
+    if(G.show){P(new THREE.TorusGeometry(G.radius,G.wire,5,28),wire,sx,E.height-.001,Z(.111),head);
+      P(boxGeo(.08,G.wire*1.4,G.wire*1.4),wire,s*A1[0]*.84,E.height+.002,Z(.064),head).rotation.y=Math.PI/2;}}
+  if(G.show){const gap=Math.max(.004,2*(E.spacing-G.radius));P(boxGeo(gap,G.wire*1.6,G.wire*1.6),wire,0,E.height+.003,Z(.112),head);}
+  // moustache: two halves and a centre piece; droop tilts the ends down
+  if(M.show){for(const sx of[-1,1]){const m=P(new THREE.CylinderGeometry(.009*M.thickness,.0053*M.thickness,.046*M.width,6),stache,sx*.021*M.width,.076,Z(.111),head);m.rotation.set(0,sx*-.25,sx*(Math.PI/2-M.droop));m.scale.z=.75;}
+    const mc=P(new THREE.SphereGeometry(.0127*M.thickness,6,4),stache,0,.082,Z(.114),head);mc.scale.set(1.6*M.width,.82,.75);}
+  // mouth: two halves so curve can turn it into a smile (+) or a frown (-)
+  for(const sx of[-1,1]){const l=P(boxGeo(O.width/2,.0045,.006),lipC,sx*O.width/4,O.height,Z(.105),head);l.rotation.z=sx*O.curve;}
   }
   const lids=[];
   let nextBlink=2+Math.random()*3;

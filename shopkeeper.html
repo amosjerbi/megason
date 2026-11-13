@@ -40,18 +40,18 @@ function col(v){const c=new THREE.Color();if(typeof v==='number')return c.set(v)
 
 // Rev 3 controls. Slider tuples are [default, min, max, step].
 const CFG3={
-  head:{width:[1,.8,1.2,.01],height:[1,.85,1.2,.01],depth:[1,.85,1.2,.01],jawWidth:[1,.7,1.3,.01],jawHeight:[1,.7,1.4,.01],facets:[12,6,32,1]},
+  head:{width:[1.14,.8,1.35,.01],height:[.85,.7,1.2,.01],depth:[1,.85,1.2,.01],jawWidth:[1.12,.7,1.3,.01],jawHeight:[.87,.7,1.4,.01],facets:[10,6,32,1]},
   skin:'#e9c4a6',
   hair:{sides:true,color:'#a7a29b',shade:'#77726c',thickness:[.27,.1,.45,.01],sideburns:true,_collapsed:true},
   ears:{size:[1,.5,1.6,.05],_collapsed:true},
-  eyes:{spacing:[.038,.026,.052,.001],height:[.14,.125,.155,.001],width:[1.35,.8,2,.05],open:[.92,.3,1.3,.02],iris:[.0058,.003,.0095,.0002],irisColor:'#5a3a22',lazyX:[.0045,-.008,.008,.0005],lazyY:[-.0025,-.008,.008,.0005]},
+  eyes:{spacing:[.046,.026,.062,.001],height:[.136,.125,.155,.001],width:[1.6,.8,2,.05],open:[1,.3,1.3,.02],iris:[.009,.003,.014,.0002],irisColor:'#6d85cb',lazyX:[.0055,-.008,.008,.0005],lazyY:[.001,-.008,.008,.0005]},
   brows:{color:'#a7a29b',width:[.042,.02,.06,.001],thickness:[.008,.003,.016,.001],height:[.168,.15,.19,.001],tilt:[-.17,-.5,.5,.01]},
-  glasses:{show:true,radius:[.026,.015,.035,.001],wire:[.0016,.0008,.005,.0002],color:'#2a2a2a'},
-  nose:{size:[1,.6,1.5,.02],hump:[1,0,2,.05],hook:[1,0,2,.05],width:[.012,.006,.022,.001],wings:[1,0,1.6,.05]},
-  moustache:{show:true,color:'#9a958f',thickness:[1.5,.5,2.5,.05],width:[1,.6,1.6,.02],droop:[.14,-.3,.6,.01]},
+  glasses:{show:true,radius:[.031,.015,.042,.001],wire:[.0026,.0008,.005,.0002],color:'#2a2a2a'},
+  nose:{size:[.9,.6,1.5,.02],hump:[1.4,0,2,.05],hook:[.2,0,2,.05],width:[.02,.006,.03,.001],wings:[1.2,0,1.6,.05]},
+  moustache:{show:true,color:'#9a958f',thickness:[2.05,.5,2.5,.05],width:[1.32,.6,1.6,.02],droop:[-.08,-.3,.6,.01]},
   mouth:{color:'#b07a68',width:[.03,.01,.05,.001],height:[.058,.045,.07,.001],curve:[0,-.4,.4,.02]},
   shirt:{color:'#7f909c',badge:'MANAGER'},
-  scene:{background:'#86acdc',animate:true,_collapsed:true},
+  scene:{background:'#86acdc',animate:false,_collapsed:true},
 };
 // the same config resolved to plain default values (used if DialKit can't load)
 const defaults=c=>Object.fromEntries(Object.entries(c).filter(([k])=>k[0]!=='_').map(([k,v])=>[k,Array.isArray(v)?v[0]:(v&&typeof v==='object')?defaults(v):v]));
