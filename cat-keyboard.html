@@ -36,18 +36,18 @@ function col(v){const c=new THREE.Color();if(typeof v==='number')return c.set(v)
 
 // Controls. Slider tuples are [default, min, max, step].
 const CFG={
-  fur:{color:'#1e1d24',gloss:[18,0,120,1]},
-  pose:{length:[.88,.7,1.3,.01],plump:[1,.8,1.25,.01],headRoll:[.32,-.2,.6,.01],headYaw:[.12,-.4,.4,.01],headPitch:[.05,-.2,.3,.01],reach:[1,.5,1.3,.02],tuck:[1,0,1.3,.05]},
+  fur:{color:'#373445',gloss:[0,0,120,1]},
+  pose:{length:[0.88,.7,1.3,.01],plump:[1,.8,1.25,.01],headRoll:[0.32,-.2,.6,.01],headYaw:[0.12,-.4,.4,.01],headPitch:[0.05,-.2,.3,.01],reach:[1,.5,1.3,.02],tuck:[1,0,1.3,.05]},
   head:{width:[1,.8,1.25,.01],height:[1,.8,1.2,.01],depth:[1,.85,1.2,.01],muzzle:[1,.7,1.3,.01],facets:[12,6,32,1]},
-  ears:{height:[1.05,.6,1.5,.02],width:[1.05,.7,1.4,.02],spread:[.6,.3,1,.01],tilt:[.05,-.2,.5,.01],inner:'#3c4a8e',lashes:true},
-  eyes:{spacing:[.058,.04,.075,.001],height:[.004,-.02,.03,.001],size:[.033,.02,.042,.001],round:[1.08,.8,1.5,.02],white:'#f5f3ee',pupil:'#141318',
-    pupilWidth:[.42,.15,.8,.01],pupilHeight:[.62,.3,1,.01],cross:[.001,-.006,.01,.0005],lazyX:[0,-.008,.008,.0005]},
-  nose:{color:'#e07a4a',size:[1,.5,1.8,.05],height:[-.032,-.05,-.01,.001]},
-  mouth:{show:true,color:'#0c0b0e'},
-  whiskers:{show:true,color:'#4a4952',length:[1,.5,1.6,.05],droop:[.12,-.2,.4,.01],_collapsed:true},
-  tail:{show:true,curl:[1,.4,1.4,.02],thickness:[1,.6,1.5,.05],_collapsed:true},
-  paws:{toes:true,_collapsed:true},
-  keyboard:{show:true,frame:'#c6ccd4',keycap:'#d9dee3',plate:'#2b2f36',cols:[14,8,18,1],rows:[5,3,6,1]},
+  ears:{height:[1.05,.6,1.5,.02],width:[1.05,.7,1.4,.02],spread:[0.6,.3,1,.01],tilt:[0.05,-.2,.5,.01],inner:'#6b3f62',lashes:false},
+  eyes:{spacing:[0.058,.04,.075,.001],height:[0.004,-.02,.03,.001],size:[0.033,.02,.042,.001],round:[1.08,.8,1.5,.02],white:'#91ba75',pupil:'#141318',
+    pupilWidth:[0.42,.15,.8,.01],pupilHeight:[0.62,.3,1,.01],cross:[0.001,-.006,.01,.0005],lazyX:[0,-.008,.008,.0005]},
+  nose:{color:'#6b3f62',size:[1.6,.5,1.8,.05],height:[-0.027,-.05,-.01,.001]},
+  mouth:{show:false,color:'#0c0b0e'},
+  whiskers:{show:true,color:'#4a4952',length:[1.6,.5,1.6,.05],droop:[0.01,-.2,.4,.01],_collapsed:true},
+  tail:{show:true,curl:[0.84,.4,1.4,.02],thickness:[1.2,.6,1.5,.05],_collapsed:true},
+  paws:{toes:false,_collapsed:true},
+  keyboard:{show:true,frame:'#b2a68c',keycap:'#d7c7a3',plate:'#d7c7a3',cols:[14,8,18,1],rows:[5,3,6,1]},
   scene:{background:'#e9e1d4',floor:'#cdb89c',animate:true,_collapsed:true},
 };
 // the same config resolved to plain default values (used if DialKit can't load)
@@ -176,7 +176,7 @@ build(defaults(CFG));
 // DialKit panel: every change rebuilds the cat (batched to one rebuild per frame). Values persist in this browser.
 try{const {createDialKit,createDialRoot}=await import('https://cdn.jsdelivr.net/npm/dialkit@2.1.0/dist/vanilla/index.js');
   createDialRoot({position:'top-right',theme:'dark'});
-  const kit=createDialKit('Keyboard cat',CFG,{id:'megason-keyboard-cat-v1',persist:true});
+  const kit=createDialKit('Keyboard cat',CFG,{id:'megason-keyboard-cat-v2',persist:true});
   let pending=null;kit.subscribe(v=>{const first=pending===null;pending=v;if(first)requestAnimationFrame(()=>{const d=pending;pending=null;build(d);});});
 }catch(err){console.warn('DialKit did not load; showing the cat with default values.',err);}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
