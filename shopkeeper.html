@@ -44,7 +44,7 @@ function salesman(x,z,ry){
   // shopkeeper in his 50s: grey store polo, glasses, grey moustache, hands resting on the counter
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
   const L=c=>new THREE.MeshLambertMaterial({color:c}),Ph=(c,s=12,sp=0x1c1c1c)=>new THREE.MeshPhongMaterial({color:c,shininess:s,specular:sp});
-  const skin=Ph(0xd99b70,6,0x111111),skinD=L(0xc4825a),polo=Ph(0x7f909c,4,0x0e0e0e),poloD=L(0x6c7c88),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
+  const skin=Ph(0xe9c4a6,6,0x111111),skinD=L(0xd6aa8c),polo=Ph(0x7f909c,4,0x0e0e0e),poloD=L(0x6c7c88),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
     hairG=L(0xa8a39c),hairD=L(0x6d665f),white=Ph(0xf6f3ec,30,0x444444),iris=L(0x4b3324),dark=L(0x101010),frame=Ph(0x2b1f19,70,0x555555),lip=L(0xa9614f),
     belt=Ph(0x2a1d14,30,0x2a2a2a),gold=Ph(0xcdb47a,80,0x777766),lens=new THREE.MeshPhongMaterial({color:0xdfefff,transparent:true,opacity:.18,shininess:120,specular:0xffffff,depthWrite:false});
   const P=(geo,mat,px,py,pz,par=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);par.add(m);return m;};
@@ -99,7 +99,7 @@ function salesman(x,z,ry){
   const head=new THREE.Group();head.position.y=.6;head.scale.setScalar(.96);body.add(head);
   // ---- face: low-poly and flat shaded, full grey hair, round glasses, bushy moustache
   const fl=c=>new THREE.MeshLambertMaterial({color:c,flatShading:true});
-  {const skin=fl(0xd99b70),hair=fl(0x8f8a84),hairD=fl(0x6b6660),dark=fl(0x151515),stache=fl(0x8c8781),lipC=fl(0xa65a4a);
+  {const skin=fl(0xe9c4a6),hair=fl(0x8f8a84),hairD=fl(0x6b6660),dark=fl(0x151515),stache=fl(0x8c8781),lipC=fl(0xa65a4a);
   // skull + jaw as one surface (smooth union of two ellipsoids), kept low-res so the facets show
   {const C1=[0,.13,0],A1=[.108*.96,.108*1.16,.108*1.04],C2=[0,.065,.012],A2=[.09,.09*.75,.09*.98],K=.022;
    const hg=new THREE.SphereGeometry(1,18,14),pa=hg.attributes.position;
@@ -144,7 +144,7 @@ function salesman2(x,z,ry){
   // shopkeeper in his 50s: grey store polo, glasses, grey moustache, hands resting on the counter
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
   const L=c=>new THREE.MeshLambertMaterial({color:c}),Ph=(c,s=12,sp=0x1c1c1c)=>new THREE.MeshPhongMaterial({color:c,shininess:s,specular:sp});
-  const skin=Ph(0xd99b70,6,0x111111),skinD=L(0xc4825a),polo=Ph(0x7f909c,4,0x0e0e0e),poloD=L(0x6c7c88),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
+  const skin=Ph(0xe9c4a6,6,0x111111),skinD=L(0xd6aa8c),polo=Ph(0x7f909c,4,0x0e0e0e),poloD=L(0x6c7c88),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
     hairG=L(0xa8a39c),hairD=L(0x6d665f),white=Ph(0xf6f3ec,30,0x444444),iris=L(0x4b3324),dark=L(0x101010),frame=Ph(0x2b1f19,70,0x555555),lip=L(0xa9614f),
     belt=Ph(0x2a1d14,30,0x2a2a2a),gold=Ph(0xcdb47a,80,0x777766),lens=new THREE.MeshPhongMaterial({color:0xdfefff,transparent:true,opacity:.18,shininess:120,specular:0xffffff,depthWrite:false});
   const P=(geo,mat,px,py,pz,par=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);par.add(m);return m;};
@@ -199,7 +199,7 @@ function salesman2(x,z,ry){
   const head=new THREE.Group();head.position.y=.6;head.scale.setScalar(.96);body.add(head);
   // ---- face (rev 2): low-poly, mostly bald with a grey horseshoe of hair, worried brows, lazy left eye, deadpan mouth
   const fl=c=>new THREE.MeshLambertMaterial({color:c,flatShading:true});
-  {const skin=fl(0xd99b70),hair=fl(0x8f8a84),hairD=fl(0x5f5a55),dark=fl(0x151515),stache=fl(0x8c8781),lipC=fl(0xa65a4a);
+  {const skin=fl(0xe9c4a6),hair=fl(0x8f8a84),hairD=fl(0x5f5a55),dark=fl(0x151515),stache=fl(0x8c8781),lipC=fl(0xa65a4a);
   {const C1=[0,.13,0],A1=[.108*.96,.108*1.16,.108*1.04],C2=[0,.065,.012],A2=[.09,.09*.75,.09*.98],K=.022;
    const hg=new THREE.SphereGeometry(1,18,14),pa=hg.attributes.position;
    for(let i=0;i<pa.count;i++){const dx=pa.getX(i),dy=pa.getY(i),dz=pa.getZ(i);
