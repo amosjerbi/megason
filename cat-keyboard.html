@@ -47,7 +47,7 @@ const CFG={
   whiskers:{show:true,color:'#4a4952',length:[1,.5,1.6,.05],droop:[.12,-.2,.4,.01],_collapsed:true},
   tail:{show:true,curl:[1,.4,1.4,.02],thickness:[1,.6,1.5,.05],_collapsed:true},
   paws:{toes:true,_collapsed:true},
-  keyboard:{show:true,frame:'#c6ccd4',keycap:'#d9dee3',glow:'#3fc3ff',glowStrength:[1,0,2,.05],cols:[14,8,18,1],rows:[5,3,6,1]},
+  keyboard:{show:true,frame:'#c6ccd4',keycap:'#d9dee3',plate:'#2b2f36',cols:[14,8,18,1],rows:[5,3,6,1]},
   scene:{background:'#e9e1d4',floor:'#cdb89c',animate:true,_collapsed:true},
 };
 // the same config resolved to plain default values (used if DialKit can't load)
@@ -95,7 +95,7 @@ function buildCat(D){
   if(T.show){const c=T.curl,pts=[V(-.02,.06,-.47*Ln),V(-.1,.035,-.55*Ln),V(-.2,.025,-.5*Ln),V(-.27*c,.022,-.36*Ln*c),V(-.3*c,.022,-.18*Ln*c)];
     const tr=.02*T.thickness;P(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),28,tr,6),fur,0,0,0,tail);const e=pts[pts.length-1];P(new THREE.SphereGeometry(tr,6,5),fur,e.x,e.y,e.z,tail);}
 
-  // ---- keyboard: brushed aluminium case, light grey keycaps on a glowing blue plate, its front-left corner under the cat's chin
+  // ---- keyboard: brushed aluminium case, light grey keycaps on a dark plate, its front-left corner under the cat's chin
   const KB=D.keyboard;let kbTop=0;
   if(KB.show){const kb=new THREE.Group();kb.position.set(.3,0,.1);kb.rotation.y=-.38;g.add(kb);
     const cols=Math.round(KB.cols),rows=Math.round(KB.rows),pitch=.04,w=cols*pitch+.03,d=rows*pitch+.03,caseH=.03;
@@ -103,14 +103,13 @@ function buildCat(D){
     const cs=new THREE.ExtrudeGeometry((()=>{const r=.012,sh=new THREE.Shape();sh.moveTo(-w/2+r,-d/2);sh.lineTo(w/2-r,-d/2);sh.quadraticCurveTo(w/2,-d/2,w/2,-d/2+r);sh.lineTo(w/2,d/2-r);sh.quadraticCurveTo(w/2,d/2,w/2-r,d/2);
       sh.lineTo(-w/2+r,d/2);sh.quadraticCurveTo(-w/2,d/2,-w/2,d/2-r);sh.lineTo(-w/2,-d/2+r);sh.quadraticCurveTo(-w/2,-d/2,-w/2+r,-d/2);return sh;})(),{depth:caseH,bevelEnabled:true,bevelSize:.004,bevelThickness:.004,bevelSegments:1,curveSegments:3});
     cs.rotateX(-Math.PI/2);const caseM=P(cs,alu,0,.004,0,kb);
-    const glowC=col(KB.glow),plate=P(new THREE.BoxGeometry(w-.018,.004,d-.018),new THREE.MeshBasicMaterial({color:glowC.clone().multiplyScalar(.35+.5*KB.glowStrength)}),0,caseH+.006,0,kb);
-    const capM=new THREE.MeshPhongMaterial({color:col(KB.keycap),shininess:30,specular:0x333333,flatShading:true,emissive:glowC,emissiveIntensity:.06*KB.glowStrength});
+    P(new THREE.BoxGeometry(w-.018,.004,d-.018),new THREE.MeshLambertMaterial({color:col(KB.plate)}),0,caseH+.011,0,kb); // sits clearly above the case top so nothing z-fights
+    const capM=new THREE.MeshPhongMaterial({color:col(KB.keycap),shininess:30,specular:0x333333,flatShading:true});
     const capG=new THREE.CylinderGeometry(pitch*.5,pitch*.64,.018,4,1);capG.rotateY(Math.PI/4);
     for(let r=0;r<rows;r++){let x=-w/2+.015,last=r===rows-1;
       for(let c=0;c<cols;){let span=1;if(last&&c===3)span=Math.max(2,cols-7);else if(r===0&&c===cols-1)span=1;else if(r===2&&c===0)span=1.5;
-        const k=P(capG,capM,x+span*pitch/2,caseH+.017,-d/2+.015+(r+.5)*pitch,kb);k.scale.set(span,1,1);x+=span*pitch;c+=Math.ceil(span);}}
-    if(KB.glowStrength>0){const pl=new THREE.PointLight(glowC,.06*KB.glowStrength,.6,1.5);pl.position.set(0,caseH+.05,0);kb.add(pl);}
-    kbTop=caseH+.026;}
+        const k=P(capG,capM,x+span*pitch/2,caseH+.02,-d/2+.015+(r+.5)*pitch,kb);k.scale.set(span,1,1);x+=span*pitch;c+=Math.ceil(span);}}
+    kbTop=caseH+.029;}
 
   // ---- head: smooth union of a wide skull and a soft muzzle, low-res so the planes read
   const HY=Math.max(kbTop,.02)+.098*H.height;
