@@ -9,17 +9,10 @@
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#86acdc;font-family:Inter,system-ui,sans-serif}
   canvas{display:block}
-  #hud{position:fixed;left:16px;bottom:16px;padding:10px 14px;border-radius:14px;background:rgba(15,18,48,.8);border:1px solid rgba(130,150,255,.38);color:#fff;font-size:13px;line-height:1.5}
-  #hud b{display:block;font-size:15px}
-  #hud span{color:#aeb4d6}
-  #revs{display:flex;gap:6px;margin:8px 0}
-  #revs button{height:34px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:#fff;font:500 13px Inter,system-ui,sans-serif;cursor:pointer}
-  #revs button.on{border-color:transparent;background:linear-gradient(135deg,#ffe066,#ffc928);color:#17112e;font-weight:600}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
-<div id="hud"><b>Shopkeeper model</b><div id="revs"><button data-rev="1">Rev 1 · full hair</button><button data-rev="2">Rev 2 · bald, lazy eye</button><button data-rev="3">Rev 3 · eagle nose, dials</button></div><span>Drag to orbit · scroll to zoom · right-drag to pan<br>The DialKit panel (top right) edits rev 3</span></div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
