@@ -200,12 +200,28 @@
   #topbar #setBtn svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   #settings code{background:rgba(255,255,255,.08);padding:1px 4px;border-radius:4px;font-size:12px}
   input[type=file]{display:none}
-  #dlg{position:fixed;left:0;right:0;bottom:0;display:none;justify-content:center;z-index:14;padding:10px;padding-bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none}
-  #dlg .box{pointer-events:auto;background:rgba(18,15,34,.95);border:2px solid #ffd23f;border-radius:14px;padding:12px 14px;max-width:520px;width:100%;max-height:62vh;overflow:auto}
-  #dlg .who{font-family:"Press Start 2P",monospace;font-size:9px;color:#ffd23f;margin-bottom:8px}
-  #dlgText{font-family:"Press Start 2P",monospace;font-size:11px;line-height:1.9;color:#f3efe6;margin-bottom:10px;user-select:text}
-  #dlgOpts button{display:block;width:100%;text-align:left;margin:6px 0;padding:11px 12px;border-radius:9px;border:1px solid rgba(154,209,255,.55);background:rgba(154,209,255,.08);color:#d9ecff;font-family:"Press Start 2P",monospace;font-size:10px;line-height:1.6;cursor:pointer}
-  #dlgOpts button:active{background:rgba(154,209,255,.25)}
+  #dlg{position:fixed;left:0;right:0;bottom:0;display:none;justify-content:center;z-index:14;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom));pointer-events:none;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+  #dlg .box{pointer-events:auto;position:relative;width:min(860px,100%);max-height:70vh;overflow:auto;padding:20px 24px 22px;background:linear-gradient(160deg,rgba(27,31,73,.97) 0%,rgba(18,21,58,.97) 55%,rgba(15,18,48,.97) 100%);border:1px solid rgba(130,150,255,.38);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);color:#fff}
+  #dlg .dhead{display:flex;align-items:center;gap:14px;padding:0 52px 14px 0;margin-bottom:16px;border-bottom:1px solid rgba(140,160,255,.16)}
+  #dlg .av{width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:50%;background:linear-gradient(135deg,#ffe066,#ffc928);color:#17112e;box-shadow:0 6px 18px rgba(255,201,40,.25)}
+  #dlg .av svg{width:24px;height:24px}
+  #dlg .who{font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:#fff;margin:0}
+  #dlg .role{font-size:13px;color:#aeb4d6;margin-top:2px}
+  #dlgX{position:absolute;top:18px;right:18px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:#fff;cursor:pointer}
+  #dlgX:hover{background:rgba(255,255,255,.1)}
+  #dlg svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #dlgText{position:relative;margin:0 0 16px;padding:14px 18px;border-radius:4px 16px 16px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(140,160,255,.16);font-size:17px;line-height:1.55;color:#fff;user-select:text;-webkit-user-select:text}
+  #dlgOpts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+  #dlgOpts button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;margin:0;padding:10px 14px 10px 16px;text-align:left;border-radius:14px;border:1px solid rgba(160,175,255,.24);background:rgba(255,255,255,.04);color:#fff;font:500 14.5px/1.35 Inter,system-ui,sans-serif;cursor:pointer;transition:background .12s,border-color .12s}
+  #dlgOpts button svg{width:16px;height:16px;flex:none;color:#5aa2ff}
+  #dlgOpts button:hover{background:rgba(61,139,255,.14);border-color:rgba(90,162,255,.6)}
+  #dlgOpts button.pri{border-color:transparent;background:linear-gradient(135deg,#ffe066,#ffc928);color:#17112e;font-weight:600;box-shadow:0 8px 24px rgba(255,201,40,.22)}
+  #dlgOpts button.pri svg{color:#17112e}
+  #dlgOpts button.pri:hover{filter:brightness(1.06)}
+  #dlgOpts button.sec{background:transparent;border-color:rgba(255,255,255,.14);color:#c9cde6}
+  #dlgOpts button.sec svg{color:#8f96bd}
+  #dlgOpts button.sec:hover{background:rgba(255,255,255,.07)}
+  @media (max-width:640px){#dlg{padding:10px}#dlg .box{padding:16px;max-height:62vh}#dlgText{font-size:15px}#dlgOpts{grid-template-columns:1fr}#dlgX{top:12px;right:12px;width:38px;height:38px}}
   #topbar button{padding:9px 8px}
   .srow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08)}
   .sctl{flex-basis:100%;display:flex;gap:14px}
@@ -335,7 +351,11 @@
   </footer>
 </div></div>
 <div id="dlg"><div class="box">
-  <div class="who">SALESMAN</div>
+  <div class="dhead">
+    <div class="av"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+    <div><div class="who">Shopkeeper</div><div class="role">Running the store since '94</div></div>
+    <button id="dlgX" aria-label="Close"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
   <div id="dlgText"></div>
   <div id="dlgOpts"></div>
 </div></div>
@@ -1410,9 +1430,14 @@ const REC={
  nds:{"platformer": ["New Super Mario Bros.", "Kirby Super Star Ultra", "Yoshi's Island DS", "Sonic Rush"], "action": ["Castlevania: Dawn of Sorrow", "The Legend of Zelda: Phantom Hourglass", "Ghost Trick: Phantom Detective"], "rpg": ["Chrono Trigger", "The World Ends with You", "Pokémon HeartGold Version", "Dragon Quest IX: Sentinels of the Starry Skies", "Mario & Luigi: Bowser's Inside Story"], "racing": ["Mario Kart DS"], "shooter": ["Metroid Prime Hunters", "Contra 4"]}
 };
 const pickOf=a=>a[Math.floor(Math.random()*a.length)];
-function say(text,opts){$('dlgText').textContent=text;const o=$('dlgOpts');o.innerHTML='';for(const [label,fn] of opts){const b=document.createElement('button');b.textContent=label;b.onclick=fn;o.appendChild(b);}$('dlg').querySelector('.box').scrollTop=0;}
+const DLG_CHEV='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>',DLG_BACK='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>',DLG_EYE='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+function say(text,opts){$('dlgText').textContent=text;const o=$('dlgOpts');o.innerHTML='';for(const [label,fn] of opts){const b=document.createElement('button');const back=fn===BACK[1],sec=back||fn===BYE[1]||fn===closeDlg||/^Just looking/.test(label),pri=label==='Let me see it';
+    if(pri)b.className='pri';else if(sec)b.className='sec';const t=document.createElement('span');t.textContent=label;
+    if(back){b.insertAdjacentHTML('afterbegin',DLG_BACK);b.style.justifyContent='flex-start';b.appendChild(t);}else{b.appendChild(t);b.insertAdjacentHTML('beforeend',pri?DLG_EYE:DLG_CHEV);}
+    b.onclick=fn;o.appendChild(b);}$('dlg').querySelector('.box').scrollTop=0;}
 function openDialogue(){if(document.pointerLockElement)document.exitPointerLock();dlgOpen=true;$('dlg').style.display='flex';$('aim').style.display='none';dRoot(pickOf(['Hey there. Looking for anything in particular?','Afternoon. What can I do for you?','Welcome in. Need a hand finding something?']));}
 function closeDlg(){dlgOpen=false;$('dlg').style.display='none';}
+$('dlgX').onclick=closeDlg;
 const BACK=['Ask something else',()=>dRoot('Sure. What else?')],BYE=['That\'s all, thanks',()=>say('No problem. Shout if you need me.',[['Leave',closeDlg]])];
 function dRoot(text){say(text,[
   ['Can you recommend a game?',dSystem],
