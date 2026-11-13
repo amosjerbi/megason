@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Megason Shopkeeper</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#86acdc;font-family:Inter,system-ui,sans-serif}
+  canvas{display:block}
+  #hud{position:fixed;left:16px;bottom:16px;padding:10px 14px;border-radius:14px;background:rgba(15,18,48,.8);border:1px solid rgba(130,150,255,.38);color:#fff;font-size:13px;line-height:1.5}
+  #hud b{display:block;font-size:15px}
+  #hud span{color:#aeb4d6}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="hud"><b>Shopkeeper model</b><span>Drag to orbit · scroll to zoom · right-drag to pan</span></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// Standalone viewer for the store's shopkeeper. salesman() is written so it can be pasted into megason.html as is.
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x86acdc);
+const camera=new THREE.PerspectiveCamera(32,innerWidth/innerHeight,.01,50);camera.position.set(-.55,1.6,1.25);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff,0x887766,1.5));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-2,3,3);scene.add(sun);
+const rim=new THREE.DirectionalLight(0xbfd4ff,.6);rim.position.set(2,2,-3);scene.add(rim);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(1.2,48),new THREE.MeshLambertMaterial({color:0x6f7f95}));floor.rotation.x=-Math.PI/2;scene.add(floor);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,1.45,0);controls.enableDamping=true;controls.minDistance=.3;controls.maxDistance=6;controls.update();
+
+// helpers the model expects from megason.html
+const boxGeo=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
+function textPlane(text,w,h,{bg='#d7263d',fg='#fff',res=128}={}){const c=document.createElement('canvas');c.width=Math.round(w*res*40);c.height=Math.round(h*res*40);
+  const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,c.width,c.height);x.fillStyle=fg;x.font=`700 ${Math.round(c.height*.62)}px Inter,sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(text,c.width/2,c.height/2+1);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t}));}
+let clerk=null;
+
+function salesman(x,z,ry){
+  // shopkeeper in his 50s: grey store polo, glasses, grey moustache, hands resting on the counter
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
+  const L=c=>new THREE.MeshLambertMaterial({color:c}),Ph=(c,s=12,sp=0x1c1c1c)=>new THREE.MeshPhongMaterial({color:c,shininess:s,specular:sp});
+  const skin=Ph(0xd99b70,6,0x111111),skinD=L(0xc4825a),polo=Ph(0x7f909c,4,0x0e0e0e),poloD=L(0x6c7c88),trous=L(0x353b47),shoe=Ph(0x1b1513,45,0x333333),
+    hairG=L(0xa8a39c),hairD=L(0x6d665f),white=Ph(0xf6f3ec,30,0x444444),iris=L(0x4b3324),dark=L(0x101010),frame=Ph(0x2b1f19,70,0x555555),lip=L(0xa9614f),
+    belt=Ph(0x2a1d14,30,0x2a2a2a),gold=Ph(0xcdb47a,80,0x777766),lens=new THREE.MeshPhongMaterial({color:0xdfefff,transparent:true,opacity:.18,shininess:120,specular:0xffffff,depthWrite:false});
+  const P=(geo,mat,px,py,pz,par=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);par.add(m);return m;};
+  const lathe=(pts,seg=28)=>new THREE.LatheGeometry(pts.map(([r,y])=>new THREE.Vector2(r,y)),seg);
+  const ZS=.62; // torso cross-section is an ellipse: narrower front-to-back
+
+  // ---- legs, shoes, hips
+  for(const sx of[-1,1]){
+    P(new THREE.CylinderGeometry(.082,.062,.8,16),trous,sx*.092,.43,0);
+    const sh=P(new THREE.SphereGeometry(.062,16,10),shoe,sx*.095,.045,.045);sh.scale.set(.95,.72,2.0);
+    P(boxGeo(.105,.018,.25),dark,sx*.095,.009,.045);}
+  const hips=P(lathe([[.0,.78],[.17,.78],[.19,.86],[.196,.95],[.0,.95]]),trous,0,0,0);hips.scale.z=ZS+.04;
+
+  // ---- torso (animated as one group)
+  const body=new THREE.Group();body.position.y=.94;g.add(body);
+  const torso=P(lathe([[.0,0],[.192,0],[.206,.07],[.214,.16],[.207,.26],[.2,.34],[.212,.43],[.214,.49],[.192,.535],[.13,.565],[.062,.582],[.0,.585]]),polo,0,0,0,body);torso.scale.z=ZS;
+  const belly=P(new THREE.SphereGeometry(.17,20,14),polo,0,.15,.03,body);belly.scale.set(1.08,.9,.62);
+  const bl=P(new THREE.CylinderGeometry(.199,.199,.045,28,1,true),belt,0,.012,0,body);bl.scale.z=ZS+.035;
+  P(boxGeo(.05,.036,.012),gold,0,.012,.131,body);
+  for(const sx of[-1,1]){const s=P(new THREE.SphereGeometry(.078,16,12),polo,sx*.182,.5,0,body);s.scale.set(1,.85,.9);}
+  // collar, placket and buttons, embroidered logo, name badge
+  const back=P(new THREE.TorusGeometry(.066,.016,8,24,Math.PI*1.25),poloD,0,.578,-.005,body);back.rotation.order='YXZ';back.rotation.x=Math.PI/2;back.rotation.y=Math.PI*.625+Math.PI/2;back.scale.set(1,1.15,1);
+  for(const sx of[-1,1]){const c=P(boxGeo(.06,.012,.07),poloD,sx*.038,.572,.085,body);c.rotation.set(-.55,sx*-.55,sx*.3);}
+  P(boxGeo(.032,.12,.006),poloD,0,.5,.133,body);for(let k=0;k<3;k++)P(new THREE.SphereGeometry(.0055,8,6),white,0,.548-k*.04,.137,body);
+  const logo=textPlane('MEGASON',.075,.019,{bg:'#7f909c',fg:'#ffffff',border:null,res:40});logo.position.set(-.088,.45,.12);logo.rotation.y=-.38;body.add(logo);
+  const badge=new THREE.Group();badge.position.set(.09,.43,.121);badge.rotation.y=.38;body.add(badge);
+  P(boxGeo(.068,.032,.004),gold,0,0,0,badge);const nt=textPlane('MANAGER',.062,.026,{bg:'#f4f1e8',fg:'#1b1b1f',border:null,res:40});nt.position.z=.0025;badge.add(nt);
+
+  // ---- arms: two-bone IK so the hands rest flat on the counter in front of him
+  const A=.29,B=.255,shY=.49;
+  const wrist=[.105,.34]; // [y,z] in body space: counter top, a hand's length from the edge
+  for(const sx of[-1,1]){
+    const dy=wrist[0]-shY,dz=wrist[1],d=Math.min(A+B-.001,Math.hypot(dy,dz));
+    const theta=Math.atan2(dz,-dy),alpha=Math.acos((A*A+d*d-B*B)/(2*A*d)),inner=Math.acos((A*A+B*B-d*d)/(2*A*B));
+    const up=theta-alpha,bend=Math.PI-inner;
+    const sh=new THREE.Group();sh.position.set(sx*.205,shY,0);sh.rotation.order='ZXY';sh.rotation.x=-up;sh.rotation.z=sx*.05;body.add(sh);
+    P(new THREE.CylinderGeometry(.074,.08,.19,16),polo,0,-.08,0,sh);P(new THREE.CylinderGeometry(.081,.081,.02,16),poloD,0,-.172,0,sh);
+    P(new THREE.CapsuleGeometry(.047,.13,6,14),skin,0,-.21,0,sh);
+    const el=new THREE.Group();el.position.y=-A;el.rotation.x=-bend;sh.add(el);
+    P(new THREE.SphereGeometry(.047,14,10),skin,0,0,0,el);P(new THREE.CylinderGeometry(.045,.034,B,14),skin,0,-B/2,0,el);
+    const wr=new THREE.Group();wr.position.y=-B;wr.rotation.x=-(Math.PI/2-(up+bend));el.add(wr);
+    const palm=P(new THREE.SphereGeometry(.05,16,12),skin,0,-.052,-.004,wr);palm.scale.set(.88,1.08,.42);
+    [-.026,-.009,.009,.026].forEach((fx,i)=>{const f=P(new THREE.CapsuleGeometry(.0092,.04+(i===1||i===2?.008:0),4,8),skin,fx*sx,-.118-(i===1||i===2?.004:0),-.006,wr);f.rotation.x=.22;f.rotation.z=fx*sx*-.6;});
+    const th=P(new THREE.CapsuleGeometry(.011,.04,4,8),skin,-sx*.045,-.05,-.006,wr);th.rotation.z=sx*-.75;th.rotation.x=.25;
+    P(new THREE.CylinderGeometry(.036,.036,.012,14),sx<0?dark:skinD,0,-.004,0,wr);                       // watch band / wrist crease
+    if(sx<0)P(new THREE.CylinderGeometry(.016,.016,.006,16),gold,0,-.004,.034,wr).rotation.x=Math.PI/2;}
+
+  // ---- neck and head
+  P(new THREE.CylinderGeometry(.05,.058,.08,14),skin,0,.58,0,body);
+  const head=new THREE.Group();head.position.y=.6;head.scale.setScalar(.96);body.add(head);
+  // ---- face: low-poly and flat shaded, full grey hair, round glasses, bushy moustache
+  const fl=c=>new THREE.MeshLambertMaterial({color:c,flatShading:true});
+  {const skin=fl(0xd99b70),hair=fl(0x8f8a84),hairD=fl(0x6b6660),dark=fl(0x151515),stache=fl(0x8c8781),lipC=fl(0xa65a4a);
+  // skull + jaw as one surface (smooth union of two ellipsoids), kept low-res so the facets show
+  {const C1=[0,.13,0],A1=[.108*.96,.108*1.16,.108*1.04],C2=[0,.065,.012],A2=[.09,.09*.75,.09*.98],K=.022;
+   const hg=new THREE.SphereGeometry(1,18,14),pa=hg.attributes.position;
+   for(let i=0;i<pa.count;i++){const dx=pa.getX(i),dy=pa.getY(i),dz=pa.getZ(i);
+     const r1=1/Math.sqrt((dx/A1[0])**2+(dy/A1[1])**2+(dz/A1[2])**2);
+     const ox=(C1[0]-C2[0])/A2[0],oy=(C1[1]-C2[1])/A2[1],oz=(C1[2]-C2[2])/A2[2],ux=dx/A2[0],uy=dy/A2[1],uz=dz/A2[2];
+     const qa=ux*ux+uy*uy+uz*uz,qb=2*(ox*ux+oy*uy+oz*uz),qc=ox*ox+oy*oy+oz*oz-1,disc=qb*qb-4*qa*qc;
+     const r2=disc>0?Math.max(0,(-qb+Math.sqrt(disc))/(2*qa)):0;
+     const h=Math.max(K-Math.abs(r1-r2),0)/K,r=Math.max(r1,r2)+h*h*K*.25;
+     pa.setXYZ(i,dx*r,dy*r,dz*r);}
+   hg.computeVertexNormals();P(hg,skin,C1[0],C1[1],C1[2],head);}
+  // hair: full grey cap over the top and back, receding a little at the front corners, thick at the sides
+  const cap=P(new THREE.SphereGeometry(.12,12,8,0,Math.PI*2,0,Math.PI*.5),hair,0,.15,-.012,head);cap.scale.set(1.03,1.1,1.06);cap.rotation.x=-.42;
+  const nape=P(new THREE.SphereGeometry(.104,10,7),hairD,0,.112,-.036,head);nape.scale.set(1.02,.82,.9);
+  for(const sx of[-1,1]){const sd=P(new THREE.SphereGeometry(.052,7,5),hair,sx*.094,.155,-.02,head);sd.scale.set(.52,1.1,1.45);
+    const ear=P(new THREE.SphereGeometry(.031,7,5),skin,sx*.106,.118,-.004,head);ear.scale.set(.45,1.25,.8);}
+  // big rounded nose
+  const nb=P(new THREE.SphereGeometry(.016,6,5),skin,0,.128,.108,head);nb.scale.set(.85,1.7,1);
+  const nose=P(new THREE.SphereGeometry(.024,8,6),skin,0,.104,.117,head);nose.scale.set(1.05,1.12,1.12);
+  // eyes, heavy stern brows, thick round glasses
+  for(const sx of[-.041,.041]){P(new THREE.SphereGeometry(.009,6,5),dark,sx,.142,.101,head);
+    const br=P(boxGeo(.044,.012,.014),hairD,sx,.169,.103,head);br.rotation.z=sx>0?.13:-.13;
+    P(new THREE.TorusGeometry(.026,.0048,6,20),dark,sx,.142,.11,head);
+    const tm=P(boxGeo(.006,.006,.105),dark,sx*1.66,.146,.058,head);tm.rotation.y=sx>0?-.12:.12;}
+  P(boxGeo(.03,.006,.006),dark,0,.147,.112,head);
+  // bushy grey moustache in two drooping halves, small mouth under it
+  for(const sx of[-1,1]){const m=P(new THREE.SphereGeometry(.031,8,6),stache,sx*.017,.08,.105,head);m.scale.set(1.2,.55,.6);m.rotation.z=sx*-.3;}
+  const mc=P(new THREE.SphereGeometry(.018,6,5),stache,0,.085,.109,head);mc.scale.set(1.3,.6,.6);
+  P(boxGeo(.03,.0045,.006),lipC,0,.06,.103,head);
+  }
+  const lids=[];
+  let nextBlink=2+Math.random()*3;
+  const anim=t=>{ // breathing, an occasional blink, a small nod now and then
+    const br2=Math.sin(t*1.5);torso.scale.set(1+br2*.006,1+br2*.004,ZS*(1+br2*.012));
+    let lidX=.2;if(t>nextBlink){const k=(t-nextBlink)/.14;if(k<1)lidX=.2+Math.sin(k*Math.PI)*1.25;else nextBlink=t+2.5+Math.random()*4;}
+    for(const l of lids)l.rotation.x=lidX;
+    head.rotation.x=Math.sin(t*.7)*.025+Math.max(0,Math.sin(t*.23))*.04;head.rotation.z=Math.sin(t*.37)*.02;};
+  clerk={g,body,head,ry,anim};
+}
+
+salesman(0,0,0);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+renderer.setAnimationLoop(t=>{clerk.anim(t/1000);controls.update();renderer.render(scene,camera);});
+</script>
+</body>
+</html>
