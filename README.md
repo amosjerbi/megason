@@ -1,3 +1,5 @@
+![The storefront at night](screenshots/storefront.jpg)
+
 # Megason Center
 
 באמצע שנות ה-90 נחשפתי לעולם המרהיב של תעשיית הגיימינג, הכל היה רענן והיו קפיצות דוריות בין טכנולוגיות ובמרכז של כל זה היתה חנות קטנה בשם מגה סאן סנטר שהתחילה את דרכה כחנות קטנה בקניון של נווה חוף ואחרי כמה שנים עברה החנות לקניון הזהב.
@@ -22,8 +24,6 @@ It was the place that brought everything I loved under one roof. This project is
 https://web.archive.org/web/20020119225225/http://www.megasoncenter.co.il/
 
 ---
-
-![The storefront at night](screenshots/storefront.jpg)
 
 | | |
 |---|---|
