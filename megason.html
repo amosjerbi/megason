@@ -882,8 +882,8 @@ function poster(lines,colors,w,h){const t=canvasTex(256,Math.round(256*h/w),(x,W
   x.textAlign='center';x.textBaseline='middle';lines.forEach(([txt,size,col],i)=>{x.font=`${size}px "Press Start 2P"`;x.lineWidth=5;x.strokeStyle='#120a1e';x.strokeText(txt,W/2,H*(.2+i*.6/Math.max(1,lines.length-1)));x.fillStyle=col;x.fillText(txt,W/2,H*(.2+i*.6/Math.max(1,lines.length-1)));});
   x.strokeStyle='#fff';x.lineWidth=6;x.strokeRect(3,3,W-6,H-6);});return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshLambertMaterial({map:t}));}
 /* real posters (LaunchBox Games Database), drawn cover-fit; the mock stays if the image can't load */
-const REAL_POSTERS={sonic2:'https://images.launchbox-app.com/r2_a1325266-2a4b-470b-91de-cb00a32399f4.png',crash:'https://images.launchbox-app.com/r2_65131e66-296c-41fe-b6a4-0c85aa7f87ec.jpg',nights:'https://images.launchbox-app.com/r2_b8def444-67e6-4269-87bb-78a15e281311.jpg',supermetroid:'https://images.launchbox-app.com/r2_94e07e08-0ac1-438e-a42d-e5806e8fbf91.jpg',sotn:'https://images.launchbox-app.com/93d2ad80-4c41-4390-a1d7-0452c14939fe.png'};
-const ROLLUP_POOL=[['supermetroid','snes'],['sotn','ps1'],['crash','ps1'],['sonic2','md'],['nights','saturn']];   // the storefront roll-up shows one at random on each visit
+const REAL_POSTERS={sonic2:'https://images.launchbox-app.com/r2_a1325266-2a4b-470b-91de-cb00a32399f4.png',crash:'https://images.launchbox-app.com/r2_65131e66-296c-41fe-b6a4-0c85aa7f87ec.jpg',nights:'https://images.launchbox-app.com/r2_b8def444-67e6-4269-87bb-78a15e281311.jpg',supermetroid:'https://images.launchbox-app.com/r2_94e07e08-0ac1-438e-a42d-e5806e8fbf91.jpg',sotn:'https://images.launchbox-app.com/93d2ad80-4c41-4390-a1d7-0452c14939fe.png',smw:'https://images.launchbox-app.com/r2_28ade686-cb56-4cba-af90-eee09594d82c.png',mmx:'https://images.launchbox-app.com/r2_863f9f6d-5b12-4091-a7bd-346756ac5797.png',contra3:'https://images.launchbox-app.com/r2_bf6d0370-3fc4-4147-9b6f-3b964adda21b.png',yoshi:'https://images.launchbox-app.com/ec4ea33b-6202-4017-98a6-da49827b78d0.png',goldeneye:'https://images.launchbox-app.com/b60f5e1b-773d-477d-9900-bd88ff61840c.jpg',banjo:'https://images.launchbox-app.com/r2_241530bb-a7c9-49de-b36b-df5cf6243544.png',mgs:'https://images.launchbox-app.com/65ced8ee-7ace-49e2-8579-c186d8bc22f8.jpg',ff7:'https://images.launchbox-app.com/r2_c67ddeca-ec4b-4102-90c5-f9aaccbcdee9.png',recv:'https://images.launchbox-app.com/r2_6c30350d-6307-40ae-8fe3-7967e104835e.png',gunstar:'https://images.launchbox-app.com/615ef01e-73f4-46c8-b1d6-6663bf06099c.png',shinobi3:'https://images.launchbox-app.com/r2_cb2f4171-df88-4160-8c45-204517540377.png',pstar4:'https://images.launchbox-app.com/1f3ed10d-d595-417e-883a-76e6cc286e5b.png'};
+const ROLLUP_POOL=[['supermetroid','snes'],['sotn','ps1'],['crash','ps1'],['sonic2','md'],['nights','saturn'],['smw','snes'],['mmx','snes'],['contra3','snes'],['yoshi','snes'],['goldeneye','n64'],['banjo','n64'],['mgs','ps1'],['ff7','ps1'],['recv','dc'],['gunstar','md'],['shinobi3','md'],['pstar4','md']];   // the storefront roll-up shows one at random on each visit
 const posterImgs={};
 function posterImg(key){return posterImgs[key]||(posterImgs[key]=loadUrlImage(REAL_POSTERS[key]));}
 function drawFit(x,img,W,H){const sc=Math.max(W/img.width,H/img.height),w=img.width*sc,h=img.height*sc;x.fillStyle='#000';x.fillRect(0,0,W,H);x.drawImage(img,(W-w)/2,(H-h)/2,w,h);}
@@ -1832,11 +1832,12 @@ const SF=(()=>{
     pad(crtX+.4,ZF+.13,-.35,0);pad(rx-.5,ZF+.15,.25,1);
     /* front row: loose consoles and boxed consoles (real box scans) between the pads */
     const deckConsole=(t,x,z,ry,sc=1)=>{const m=consoleModel(t);m.position.set(x,D0,z);m.rotation.y=ry;m.scale.setScalar(sc);G.add(m);};
-    const deckBox=(sys,x,z,ry)=>{const e=CONSOLE_SCANS.find(c=>c[0]===sys);if(!e)return;const m=realConsoleBox(e,.5,.4);const [,bh]=m.userData.size;m.position.set(x,D0+bh/2+.001,z);m.rotation.y=ry;G.add(m);};
+    const boxPick=[...CONSOLE_SCANS].sort(()=>Math.random()-.5);   // two different boxed consoles, reshuffled on every visit
+    const deckBox=(i,x,z,ry)=>{const e=boxPick[i];if(!e)return;const m=realConsoleBox(e,.5,.4);const [,bh]=m.userData.size;m.position.set(x,D0+bh/2+.001,z);m.rotation.y=ry;G.add(m);};
     deckConsole('md',W0+.32,ZF+.12,.3,1.5);
-    deckBox('GENESIS',W0+.85,ZF+.02,.12);
+    deckBox(0,W0+.85,ZF+.02,.12);
     deckConsole('n64',crtX-.3,ZF+.13,-.15,1.45);
-    deckBox('DREAMCAST',rx-.1,ZF+.02,-.14);
+    deckBox(1,rx-.1,ZF+.02,-.14);
     deckConsole('ps1',W1-.24,ZF+.13,-.3,1.5);
     fairyOn=basic({color:0xffe2a8,toneMapped:false});fairyDim=basic({color:0xb88a4a,toneMapped:false});
     const fg=new THREE.SphereGeometry(.02,8,6);
