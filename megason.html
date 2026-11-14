@@ -1719,7 +1719,7 @@ const SF=(()=>{
 
   function build(){if(built)return;built=true;scene.add(G);
     const woodT=ctex(256,256,(x,w,h)=>{x.fillStyle='#3a2416';x.fillRect(0,0,w,h);for(let i=0;i<90;i++){x.strokeStyle=`rgba(${20+rnd()*30|0},${10+rnd()*14|0},4,${.25+rnd()*.35})`;x.lineWidth=1+rnd()*2;x.beginPath();const yy=rnd()*h;x.moveTo(0,yy);for(let q=0;q<=w;q+=16)x.lineTo(q,yy+Math.sin(q*.05+i)*2);x.stroke();}},[2,1]);
-    const woodM=std({color:0xf4f1ec,roughness:.3}),darkWoodM=std({color:0xe2ded6,roughness:.4});   // white shopfront (was wood)
+    const woodM=std({color:0xd6d0c6,roughness:.3}),darkWoodM=std({color:0xc6c0b5,roughness:.4});   // white shopfront (was wood)
     const chromeM=std({color:0xb8b2a6,metalness:.85,roughness:.3});
     const glassM=std({color:0xa8cde0,transparent:true,opacity:.1,roughness:.05,depthWrite:false});
     const streakT=ctex(256,256,(x,w,h)=>{x.clearRect(0,0,w,h);const g=x.createLinearGradient(0,0,w,h);
@@ -1727,14 +1727,14 @@ const SF=(()=>{
     const streakM=basic({map:streakT,transparent:true,opacity:.16,blending:THREE.AdditiveBlending,depthWrite:false});
 
     /* mall floor: big glossy cream tiles with thin grout (2x2 tiles per texture, 0.8 m each) */
-    const tileT=ctex(512,512,(x,w,h)=>{x.fillStyle='#b9b0a2';x.fillRect(0,0,w,h);const q=w/2;
-      for(let i=0;i<2;i++)for(let j=0;j<2;j++){const l=82+rnd()*4;x.fillStyle=`hsl(36,${16+rnd()*6}%,${l}%)`;x.fillRect(i*q+2,j*q+2,q-4,q-4);
+    const tileT=ctex(512,512,(x,w,h)=>{x.fillStyle='#a39a8c';x.fillRect(0,0,w,h);const q=w/2;
+      for(let i=0;i<2;i++)for(let j=0;j<2;j++){const l=72+rnd()*4;x.fillStyle=`hsl(36,${16+rnd()*6}%,${l}%)`;x.fillRect(i*q+2,j*q+2,q-4,q-4);
         for(let n=0;n<5;n++){x.strokeStyle=`rgba(150,135,115,${.05+rnd()*.06})`;x.lineWidth=1+rnd()*2;x.beginPath();let px=i*q+rnd()*q,py=j*q+rnd()*q;x.moveTo(px,py);for(let k=0;k<6;k++){px+=(rnd()-.5)*60;py+=(rnd()-.3)*40;x.lineTo(px,py);}x.stroke();}}
       for(let n=0;n<2200;n++){x.fillStyle=rnd()<.5?'rgba(0,0,0,.035)':'rgba(255,255,255,.07)';x.fillRect(rnd()*w,rnd()*h,2,2);}},[20,15]);
     const street=pl(32,24,std({map:tileT,roughness:.16,metalness:.05}),0,0,RZ+12);street.rotation.x=-Math.PI/2;
     {const [pk,sys]=ROLLUP_POOL[Math.floor(Math.random()*ROLLUP_POOL.length)];rollupStand(-2.48,F+.55,.22,pk,PLAT[sys].name.toUpperCase());}   // roll-up banner on the pavement, left of the window: a different real poster every visit
     /* mall walls: smooth warm-white panels with faint seams, a dark skirting strip at the floor */
-    const wallT=ctex(256,256,(x,w,h)=>{x.fillStyle='#ebe6de';x.fillRect(0,0,w,h);
+    const wallT=ctex(256,256,(x,w,h)=>{x.fillStyle='#cfc8bd';x.fillRect(0,0,w,h);
       for(let n=0;n<1400;n++){x.fillStyle=rnd()<.5?'rgba(0,0,0,.025)':'rgba(255,255,255,.05)';x.fillRect(rnd()*w,rnd()*h,2,2);}
       x.fillStyle='rgba(120,105,90,.22)';x.fillRect(0,0,2,h);x.fillRect(0,0,w,1);});
     const wall=(x0,x1,y0,y1,z0,z1)=>{const t=wallT.clone();t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set((x1-x0)/1.2,(y1-y0)/2.4);t.needsUpdate=true;return span(x0,x1,y0,y1,z0,z1,std({map:t,roughness:.55}));};
