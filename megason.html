@@ -1813,9 +1813,7 @@ const SF=(()=>{
     const rx=W1-.42;
     consoleBox(rx,D0,ZB+.05,.66,.16,.5,blackM);consoleBox(rx,D0+.16,ZB+.05,.62,.13,.45,grayM);consoleBox(rx,D0+.29,ZB+.05,.56,.12,.4,grayD);
     bx(.5,.38,.36,crtBody,rx,D0+.41+.19,ZB+.05);bx(.43,.32,.02,crtBezel,rx-.02,D0+.6,ZB+.235);pl(.38,.28,smwM,rx-.02,D0+.6,ZB+.247);
-    coverBox(rx-.05,D0+.27,ZF,.5,.5,.14,-.05,-.18);
-    for(let i=0;i<5;i++)coverBox(W0+.3+i*.27,D0+.16,ZF+.05+(i%2)*.03,.24,.31,.045,-.12,(rnd()-.5)*.3);
-    for(let i=0;i<2;i++)coverBox(crtX-.25+i*.4,D0+.025,ZF+.06,.32,.05,.24,-Math.PI/2+.02,(rnd()-.5)*.5);
+    // (no game boxes in the window: just the CRTs, consoles and pads)
     /* two game pads lying on the deck, cables trailing back */
     const pad=(x,z,ry,kind)=>{const g=new THREE.Group();g.position.set(x,D0,z);g.rotation.y=ry;g.scale.setScalar(1.35);G.add(g);
       const bodyM=std({color:kind?0xb9b4ac:0x141416,roughness:.5}),dM=std({color:0x0c0c0e,roughness:.4});
@@ -1901,7 +1899,7 @@ const SF=(()=>{
   function drive(now){if(!built)return;const t=now/1000;
     if(now-lastTV>90){lastTV=now;drawTV(t);}
     if(now-lastTw>180){lastTw=now;for(const b of fairy)if(Math.random()<.12)b.material=b.material===fairyOn?fairyDim:fairyOn;glowM.opacity=Math.random()<.02?.4:.9;}
-    if(now-lastRefresh>3200){lastRefresh=now;shufflePick();if(Math.random()<.5)shufflePick();winT.draw();}
+    if(now-lastRefresh>3200){lastRefresh=now;shufflePick();if(Math.random()<.5)shufflePick();}
     let open=0,move=0;
     if(anim){const k=cl((now-anim.t0)/2300);open=ease(cl(k/.3));move=ease(cl((k-.08)/.92));startEl.style.opacity=String(1-cl(k/.25));
       if(k>=1){const d=anim.done;anim=null;active=false;startEl.style.display='none';startEl.style.opacity='1';door.rotation.y=0;setMood(1);camera.clearViewOffset();camera.fov=fovFor(camera.aspect);camera.updateProjectionMatrix();d();return;}}
@@ -1917,7 +1915,7 @@ const SF=(()=>{
   return{
     build,drive,
     get active(){return active;},
-    ready(){ready=true;if(built){winT.draw();}frameCam();},
+    ready(){ready=true;frameCam();},
     show(){anim=null;active=true;startEl.style.opacity='1';if(door)door.rotation.y=0;setMood(0);frameCam();},
     enter(done){if(anim)return;anim={t0:performance.now(),done};},
     reframe:frameCam,
