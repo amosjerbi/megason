@@ -904,8 +904,8 @@ function plant(x,z){const g=new THREE.Group();g.position.set(x,0,z);scene.add(g)
 let clerk=null;
 const CLERK_LINES=['"Looking for anything in particular?"','"That one\'s boxed and complete."','"Trade-ins are two for one this week."','"Been running this place since \'94."','"Careful with the imports, they\'re rare."'];
 /* ---------------- shopkeeper ----------------
-   Built in shopkeeper.html (rev 3) and tuned there with DialKit; SHOPKEEPER holds the chosen look (saved version V2).
-   To change him, tune rev 3 in shopkeeper.html, copy the parameters and paste them here. */
+   Built in old/shopkeeper.html (rev 3) and tuned there with DialKit; SHOPKEEPER holds the chosen look (saved version V2).
+   To change him, tune rev 3 in old/shopkeeper.html, copy the parameters and paste them here. */
 const SHOPKEEPER={"head":{"width":1.14,"height":0.85,"depth":1,"jawWidth":1.12,"jawHeight":0.87,"facets":10},"skin":"#e9c4a6","hair":{"sides":true,"color":"#a7a29b","shade":"#77726c","thickness":0.27,"sideburns":true},"ears":{"size":1},"eyes":{"spacing":0.046,"height":0.136,"width":1.6,"open":1,"iris":0.009,"irisColor":"#6d85cb","lazyX":0.0055,"lazyY":0.001},"brows":{"color":"#a7a29b","width":0.042,"thickness":0.008,"height":0.168,"tilt":-0.17},"glasses":{"show":true,"radius":0.031,"wire":0.0026,"color":"#2a2a2a"},"nose":{"size":0.9,"hump":1.4,"hook":0.2,"width":0.02,"wings":1.2},"moustache":{"show":true,"color":"#9a958f","thickness":2.05,"width":1.32,"droop":-0.08},"mouth":{"color":"#b07a68","width":0.03,"height":0.058,"curve":0},"shirt":{"color":"#7f909c","badge":"MANAGER"}};
 // any CSS colour -> THREE.Color (hex/rgb/hsl directly, other formats via a 1px canvas)
 const _skc=document.createElement('canvas');_skc.width=_skc.height=1;const _skx=_skc.getContext('2d',{willReadFrequently:true});
@@ -1027,7 +1027,7 @@ function salesman(x,z,ry,D=SHOPKEEPER){
     head.rotation.x=Math.sin(t*.7)*.025+Math.max(0,Math.sin(t*.23))*.04;head.rotation.z=Math.sin(t*.37)*.02;};
   clerk={g,body,head,ry,anim};
 }
-/* ---------------- keyboard cat ---------------- built in cat-keyboard.html (DialKit); KBCAT holds its defaults, paste new "Copy parameters" output here */
+/* ---------------- keyboard cat ---------------- built in old/cat-keyboard.html (DialKit); KBCAT holds its defaults, paste new "Copy parameters" output here */
 let kbCat=null;
 const catV=(x,y,z)=>new THREE.Vector3(x,y,z);
 const KBCAT={"fur":{"color":"#373445","gloss":0},"pose":{"length":0.88,"plump":1,"headRoll":0.32,"headYaw":0.12,"headPitch":0.05,"reach":1,"tuck":1},"head":{"width":1,"height":1,"depth":1,"muzzle":1,"facets":12},"ears":{"height":1.05,"width":1.05,"spread":0.6,"tilt":0.05,"inner":"#6b3f62","lashes":false},"eyes":{"spacing":0.058,"height":0.004,"size":0.033,"round":1.08,"white":"#91ba75","pupil":"#141318","pupilWidth":0.42,"pupilHeight":0.62,"cross":0.001,"lazyX":0},"nose":{"color":"#6b3f62","size":1.6,"height":-0.027},"mouth":{"show":false,"color":"#0c0b0e"},"whiskers":{"show":true,"color":"#4a4952","length":1.6,"droop":0.01},"tail":{"show":true,"curl":0.84,"thickness":1.2},"paws":{"toes":false},"keyboard":{"show":true,"frame":"#b2a68c","keycap":"#d7c7a3","plate":"#d7c7a3","cols":14,"rows":5},"scene":{"background":"#e9e1d4","floor":"#cdb89c","animate":true}};
