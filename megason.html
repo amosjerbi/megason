@@ -1255,20 +1255,93 @@ function backWall(){const x0=-RX+.33,x1=RX-.35,W=x1-x0,D=.42,z0=-RZ,cols=7,cw=W/
 /* black glass counter with the register, as at the front left of the photo */
 function counterBlock(x0,z0,x1,z1,H){add(scene,boxGeo(x1-x0,H-.04,z1-z0),M.black,(x0+x1)/2,(H-.04)/2,(z0+z1)/2);add(scene,boxGeo(x1-x0+.03,.04,z1-z0+.03),M.top,(x0+x1)/2,H-.02,(z0+z1)/2);block(x0,z0,x1,z1);}
 function yellowSign(text,w,h,x,y,z,ry){const s=textPlane(text,w,h,{bg:'#f6e84a',fg:'#1b1b1f',border:null,font:'"Archivo Black"',px:.28,res:160});s.position.set(x,y,z);s.rotation.y=ry;scene.add(s);}
-function registerArea(){const H=1.02,x0=-1.48,x1=-.93,z0=3.05,z1=4.75;
-  counterBlock(x0,z0,x1,z1,H);counterBlock(-RX+.33,4.2,x0,z1,H);
-  yellowSign('WE BUY GAMES',.42,.3,x1+.004,.62,4.1,Math.PI/2);yellowSign('TRADE-INS WELCOME',.4,.28,(x0+x1)/2,.66,z1+.017,0);
+/* ---------------- counter layout ----------------
+   Each counter / case is built into its own group, then slid and turned by the offsets in LAYOUT_DEFAULTS (tuned by eye with DialKit).
+   Games inside cases and the walk-blocking rectangles follow the group. */
+const LAYOUT={},ITEMS={};   // ITEMS: the things standing on the counters, each its own group, nudged within its counter
+function item(name,x,z,ry,fn){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);fn(g);ITEMS[name]={g};return g;}
+const LAYOUT_DEFAULTS={counter:{x:-.73,z:-.07,turn:1},shopkeeper:{x:-1,z:-1.38,turn:-87},register:{x:-.385,z:0,turn:0},monitor:{x:.49,z:0,turn:0},cat:{x:.085,z:1,turn:78}};   // everything not listed sits where it was built
+function grab(name,fn){const n0=scene.children.length,g0=games.length,o0=obstacles.length;fn();
+  const kids=scene.children.slice(n0),grp=new THREE.Group();kids.forEach(k=>grp.add(k));
+  const c=new THREE.Box3().setFromObject(grp).getCenter(new THREE.Vector3());c.y=0;grp.position.copy(c);kids.forEach(k=>k.position.sub(c));scene.add(grp);
+  LAYOUT[name]={g:grp,c,games:games.slice(g0).map(e=>({e,m0:e.m.clone()})),obs:obstacles.slice(o0).map(r=>({r,r0:r.slice()}))};}
+function applyLayout(v){let regames=false;const T=new THREE.Matrix4(),D=new THREE.Matrix4(),P=new THREE.Vector3();
+  for(const [name,L] of Object.entries(LAYOUT)){const o=v[name];if(!o)continue;const a=o.turn*Math.PI/180;
+    if(L.clerk){clerk.g.position.x=L.x+o.x;clerk.g.position.z=L.z+o.z;clerk.g.rotation.y=clerk.ry=L.ry+a;D.makeRotationY(a).setPosition(L.x+o.x,0,L.z+o.z).multiply(T.makeTranslation(-L.x,0,-L.z));}
+    else{L.g.position.set(L.c.x+o.x,0,L.c.z+o.z);L.g.rotation.y=a;L.g.updateMatrix();D.copy(L.g.matrix).multiply(T.makeTranslation(-L.c.x,0,-L.c.z));
+      const mv=!!(o.x||o.z||o.turn);if(mv||L.moved)for(const {e,m0} of L.games){e.m.copy(D).multiply(m0);regames=true;}L.moved=mv;}
+    for(const {r,r0} of L.obs){let x0=1e9,z0=1e9,x1=-1e9,z1=-1e9;for(const [px,pz] of[[r0[0],r0[1]],[r0[2],r0[1]],[r0[0],r0[3]],[r0[2],r0[3]]]){P.set(px,0,pz).applyMatrix4(D);x0=Math.min(x0,P.x);z0=Math.min(z0,P.z);x1=Math.max(x1,P.x);z1=Math.max(z1,P.z);}r[0]=x0;r[1]=z0;r[2]=x1;r[3]=z1;}}
+  for(const [name,I] of Object.entries(ITEMS)){const o=v[name];if(!o)continue;if(!I.b)I.b={x:I.g.position.x,z:I.g.position.z,ry:I.g.rotation.y};
+    I.g.position.x=I.b.x+o.x;I.g.position.z=I.b.z+o.z;I.g.rotation.y=I.b.ry+o.turn*Math.PI/180;}
+  if(regames){clearTimeout(applyLayout.t);applyLayout.t=setTimeout(rebuildGameMeshes,120);}}
+/* a late-90s desktop for the counter PC: teal background, a few icons, the inventory window open, grey taskbar with a Start button */
+function retroDesktop(){const W=512,H=384,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const bevel=(bx,by,bw,bh,inset)=>{x.fillStyle='#c0c0c0';x.fillRect(bx,by,bw,bh);x.fillStyle=inset?'#808080':'#fff';x.fillRect(bx,by,bw,2);x.fillRect(bx,by,2,bh);
+    x.fillStyle=inset?'#fff':'#404040';x.fillRect(bx,by+bh-2,bw,2);x.fillRect(bx+bw-2,by,2,bh);};
+  x.fillStyle='#008080';x.fillRect(0,0,W,H);
+  x.font='11px Tahoma,"MS Sans Serif",Verdana,sans-serif';x.textAlign='center';
+  [['#ffd84a','Games'],['#e8e8e8','Inventory'],['#9ec7ff','Sales'],['#b8e08a','Trade-ins']].forEach(([col,l],i)=>{const iy=14+i*62;
+    x.fillStyle=col;x.fillRect(24,iy,30,26);x.strokeStyle='#000';x.strokeRect(24.5,iy+.5,29,25);x.fillStyle='#fff';x.fillText(l,39,iy+42);});
+  const wx=118,wy=46,ww=310,wh=250;bevel(wx,wy,ww,wh,false);
+  const g=x.createLinearGradient(wx+3,0,wx+ww-3,0);g.addColorStop(0,'#000080');g.addColorStop(1,'#1084d0');x.fillStyle=g;x.fillRect(wx+3,wy+3,ww-6,20);
+  x.fillStyle='#fff';x.textAlign='left';x.font='bold 12px Tahoma,"MS Sans Serif",Verdana,sans-serif';x.fillText('Inventory - Megason',wx+8,wy+18);
+  for(let k=0;k<3;k++){bevel(wx+ww-58+k*18,wy+6,16,14,false);}x.fillStyle='#000';x.font='bold 10px Tahoma,Verdana,sans-serif';x.fillText('_',wx+ww-54,wy+16);x.fillText('□',wx+ww-37,wy+17);x.fillText('x',wx+ww-18,wy+17);
+  x.font='11px Tahoma,"MS Sans Serif",Verdana,sans-serif';x.fillText('File   Edit   View   Help',wx+8,wy+38);
+  x.fillStyle='#fff';x.fillRect(wx+6,wy+46,ww-12,wh-52);x.fillStyle='#808080';x.fillRect(wx+6,wy+46,ww-12,2);x.fillRect(wx+6,wy+46,2,wh-52);
+  const rows=[['Title','Sys','Qty','Price'],['Sonic 2','MD','4','39'],['Super Mario World','SNES','2','49'],['Crash Bandicoot','PS1','3','35'],['NiGHTS','SAT','1','59'],['GoldenEye 007','N64','2','45'],['Shenmue','DC','1','55'],['Metal Gear Solid','PS1','2','42'],['Gunstar Heroes','MD','1','38']];
+  rows.forEach((r,i)=>{const ry=wy+50+i*21;if(i===0)bevel(wx+9,ry,ww-18,20,false);
+    x.fillStyle='#000';x.font=(i?'':'bold ')+'11px Tahoma,"MS Sans Serif",Verdana,sans-serif';[6,175,220,258].forEach((cx,k)=>x.fillText(r[k],wx+9+cx,ry+14));});
+  x.fillStyle='#000080';x.fillRect(wx+9,wy+50+3*21,ww-18,20);x.fillStyle='#fff';[6,175,220,258].forEach((cx,k)=>x.fillText(rows[3][k],wx+9+cx,wy+50+3*21+14));   // selected row
+  const TB=28;bevel(0,H-TB,W,TB,false);bevel(3,H-TB+4,70,TB-8,false);x.fillStyle='#000';x.font='bold 13px Tahoma,"MS Sans Serif",Verdana,sans-serif';x.fillText('Start',22,H-9);
+  bevel(80,H-TB+4,160,TB-8,true);x.font='11px Tahoma,"MS Sans Serif",Verdana,sans-serif';x.fillText('Inventory - Megason',90,H-10);
+  bevel(W-72,H-TB+4,68,TB-8,true);x.fillText('2:32 PM',W-60,H-10);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
+/* tall black-framed glass counter like the one in case.jpg: brass corner caps, a glass mid shelf with the shop's paperwork inside */
+function glassCounter(x0,z0,x1,z1,H){const cx=(x0+x1)/2,cz=(z0+z1)/2,w=x1-x0,d=z1-z0,K=.1,fr=.035,gh=H-.04-K;
+  add(scene,boxGeo(w,K,d),M.black,cx,K/2,cz);add(scene,boxGeo(w+.03,.04,d+.03),M.top,cx,H-.02,cz);                          // kick base, top slab
+  add(scene,boxGeo(w-.02,.008,d-.02),new THREE.MeshLambertMaterial({color:0x2a1f3d}),cx,K+.004,cz);
+  const brass=new THREE.MeshPhongMaterial({color:0xc9a54a,shininess:90,specular:0x886633});
+  for(const px of[x0+fr/2,x1-fr/2])for(const pz of[z0+fr/2,z1-fr/2]){add(scene,boxGeo(fr,gh,fr),M.black,px,K+gh/2,pz);add(scene,boxGeo(fr+.012,.04,fr+.012),brass,px,H-.06,pz);}
+  for(const px of[x0+fr/2,x1-fr/2])add(scene,boxGeo(fr,fr,d),M.black,px,K+fr/2,cz);for(const pz of[z0+fr/2,z1-fr/2])add(scene,boxGeo(w,fr,fr),M.black,cx,K+fr/2,pz);
+  const gl=(gw,px,pz,ry)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(gw,gh),M.glass);m.position.set(px,K+gh/2,pz);m.rotation.y=ry;scene.add(m);};
+  gl(d,x1,cz,Math.PI/2);gl(d,x0,cz,Math.PI/2);gl(w,cx,z0,0);gl(w,cx,z1,0);
+  const SY=K+gh*.48,sh=new THREE.Mesh(new THREE.PlaneGeometry(w-.05,d-.05),M.glass);sh.rotation.x=-Math.PI/2;sh.position.set(cx,SY,cz);scene.add(sh);
+  for(const pz of[z0+.03,z1-.03])add(scene,boxGeo(w-.06,.012,.012),M.black,cx,SY,pz);
+  // on the glass shelf: paper stacks, a blue folder of trade-in slips, a black office printer, a desk phone
+  add(scene,boxGeo(.22,.04,.3),M.white,x0+.25,SY+.02,cz);add(scene,boxGeo(.2,.012,.28),new THREE.MeshLambertMaterial({color:0xf2f0d0}),x0+.26,SY+.046,cz+.01).rotation.y=.12;
+  add(scene,boxGeo(.24,.03,.32),new THREE.MeshLambertMaterial({color:0x2a5aa8}),x0+.55,SY+.015,cz).rotation.y=-.08;
+  const pr=new THREE.Group();pr.position.set(x1-.55,SY,cz);pr.rotation.y=Math.PI;scene.add(pr);add(pr,boxGeo(.36,.13,.3),M.black,0,.065,0);add(pr,boxGeo(.26,.01,.12),M.white,0,.135,.06);
+  add(pr,boxGeo(.3,.012,.02),new THREE.MeshLambertMaterial({color:0x444448}),0,.1,.151);add(pr,boxGeo(.04,.015,.01),new THREE.MeshBasicMaterial({color:0x3cff6a}),.12,.11,.151);
+  const ph=new THREE.Group();ph.position.set(x1-.2,SY,cz);ph.rotation.y=Math.PI-.3;scene.add(ph);add(ph,boxGeo(.16,.05,.2),M.black,0,.025,0);
+  add(ph,new THREE.CapsuleGeometry(.02,.14,4,8),M.black,-.045,.07,0).rotation.x=Math.PI/2;add(ph,boxGeo(.07,.004,.08),new THREE.MeshLambertMaterial({color:0x55555a}),.035,.052,.02);
+  // on the floor of the case: binders and a shoebox of loose cartridges
+  [[0x1b1b1f,0],[0x7a1a1a,.06],[0x1b1b1f,.12]].forEach(([c,o])=>add(scene,boxGeo(.05,.28,.24),new THREE.MeshLambertMaterial({color:c}),x0+.2+o,K+.14,cz));
+  add(scene,boxGeo(.3,.12,.22),new THREE.MeshLambertMaterial({color:0xd9c9a3}),x1-.35,K+.06,cz);
+  block(x0,z0,x1,z1);}
+function registerArea(){const H=1.02,x0=-1.48,x1=-.2,z0=3.05,z1=3.6;   // tall glass counter across the front: the low case row runs back from its left end (an L, as in case.jpg)
+  grab('counter',()=>{glassCounter(x0,z0,x1,z1,H);
+  yellowSign('TRADE-INS WELCOME',.4,.28,x1-.012,.66,(z0+z1)/2,Math.PI/2);
+  item('terminal',-1.05,3.2,.25,g=>{add(g,boxGeo(.09,.03,.15),M.black,0,H+.015,0);add(g,boxGeo(.06,.003,.05),new THREE.MeshLambertMaterial({color:0x55555a}),0,H+.032,0);});   // card terminal
   // cash register (beige), facing the clerk, with a customer display
-  const reg=new THREE.Group();reg.position.set(-1.22,H,3.45);reg.rotation.y=-Math.PI/2;scene.add(reg);
+  const reg=new THREE.Group();reg.position.set(-.75,H,3.33);scene.add(reg);ITEMS.register={g:reg};
   add(reg,boxGeo(.4,.11,.4),M.beige,0,.055,0);const kb=add(reg,boxGeo(.36,.03,.2),M.beige,0,.13,.08);kb.rotation.x=-.35;
   add(reg,boxGeo(.3,.012,.14),new THREE.MeshLambertMaterial({color:0x5b5b5b}),0,.15,.085).rotation.x=-.35;
   add(reg,boxGeo(.03,.18,.03),M.beige,0,.2,-.15);add(reg,boxGeo(.16,.06,.04),M.black,0,.3,-.15);
   const d=textPlane('$ 24.99',.13,.035,{bg:'#0b2a12',fg:'#5cff7a',border:null,res:64});d.position.set(0,.3,-.172);d.rotation.y=Math.PI;reg.add(d);
-  add(scene,boxGeo(.18,.13,.22),M.beige,-1.16,H+.065,3.13);add(scene,boxGeo(.12,.005,.1),M.white,-1.16,H+.135,3.17);   // receipt printer
-  const mon=new THREE.Group();mon.position.set(-1.8,H,4.52);mon.rotation.y=3.04;scene.add(mon);                     // beige PC monitor on the back counter, facing the clerk
-  add(mon,boxGeo(.34,.28,.3),M.beige,0,.2,0);add(mon,boxGeo(.28,.21,.01),new THREE.MeshBasicMaterial({color:0x1b3a5a}),0,.21,.151);add(mon,boxGeo(.2,.06,.2),M.beige,0,.03,0);
-  add(scene,boxGeo(.24,.025,.32),M.white,-2.13,H+.012,4.45);add(scene,boxGeo(.22,.02,.3),new THREE.MeshLambertMaterial({color:0xf2f0d0}),-2.11,H+.035,4.47);   // papers
-  add(scene,boxGeo(.12,.05,.2),M.black,-1.56,H+.025,4.64);   // phone
+  const mon=new THREE.Group();mon.position.set(-1.25,H,3.36);mon.rotation.y=Math.PI;scene.add(mon);ITEMS.monitor={g:mon};                 // beige PC monitor with its blue screen, at the clerk's end
+  // beige CRT like monitor.jpg: thick front bezel, tapered tube behind, round swivel foot, LEDs and buttons under the screen
+  {const kc=skCol(KBCAT.keyboard.keycap),B=new THREE.MeshPhongMaterial({color:kc,shininess:30,specular:0x333333,emissive:kc,emissiveIntensity:.4}),Bd=B,   // same beige as the cat's keyboard, a little self-lit so the sides don't fall into shadow
+   dk=new THREE.MeshLambertMaterial({color:0x6d675c});
+   add(mon,new THREE.CylinderGeometry(.115,.12,.014,32),B,0,.007,.0);add(mon,new THREE.CylinderGeometry(.06,.075,.03,24),Bd,0,.029,.0);
+   add(mon,boxGeo(.37,.31,.075),B,0,.205,.095);                                                                   // front shell
+   const tube=new THREE.CylinderGeometry(.235,.15,.22,4,1);tube.rotateY(Math.PI/4);tube.rotateX(Math.PI/2);tube.scale(1,.8,1);
+   add(mon,tube,Bd,0,.215,-.05);add(mon,boxGeo(.2,.15,.03),Bd,0,.215,-.17);                                     // tapered tube and back cap
+   add(mon,boxGeo(.3,.225,.006),new THREE.MeshLambertMaterial({color:0x2a2c30}),0,.222,.131);                   // dark recess round the glass
+   const sp=new THREE.Mesh(new THREE.PlaneGeometry(.282,.21),new THREE.MeshBasicMaterial({map:retroDesktop(),color:0x8c8c8c,toneMapped:false}));sp.position.set(0,.222,.1345);mon.add(sp);
+   for(let k=0;k<6;k++)add(mon,new THREE.CylinderGeometry(.0028,.0028,.004,8),dk,-.135+k*.014,.078,.1335).rotation.x=Math.PI/2;      // row of dots
+   for(let k=0;k<3;k++)add(mon,new THREE.CylinderGeometry(.007,.007,.006,14),Bd,-.005+k*.02,.078,.1345).rotation.x=Math.PI/2;      // menu buttons
+   add(mon,new THREE.CylinderGeometry(.012,.012,.008,18),Bd,.1,.078,.1355).rotation.x=Math.PI/2;                                    // power button
+   add(mon,new THREE.SphereGeometry(.003,8,6),new THREE.MeshBasicMaterial({color:0x3cff6a,toneMapped:false}),.078,.078,.134);}add(mon,boxGeo(.2,.06,.2),M.beige,0,.03,0);});
 }
 
 /* CRTs hung high on the right wall on angled brackets, tilted down at the aisle */
@@ -1299,19 +1372,19 @@ function buildStore(){
   posterImg('nights').then(img=>{rollupDefImg=img;if(!rollupBlob){drawRollupDefault();rollupTex.needsUpdate=true;}}).catch(()=>{});
   // LEFT COUNTER RUN: register at the front, then black-framed glass cases
   registerArea();
-  glassCase({x:-1.48,z:2.95,ry:Math.PI/2,L:1.8,W:.55,H:1.0,plat:'mix',seed:31});
-  glassCase({x:-1.48,z:1.05,ry:Math.PI/2,L:1.8,W:.55,H:1.0,consoles:['ps2','x360','wii'],seed:32});
-  glassCase({x:-1.48,z:-.85,ry:Math.PI/2,L:1.8,W:.55,H:1.0,consoles:['md','snes','n64'],seed:33});
+  grab('leftCase1',()=>{glassCase({x:-1.48,z:2.95,ry:Math.PI/2,L:1.8,W:.55,H:1.0,plat:'mix',seed:31});keyboardCat(-1.2,1.02,2.0,Math.PI/2,.55);ITEMS.cat={g:scene.children.at(-1)};});   // the shop cat dozing on its keyboard on top of the first case, facing customers
+  grab('leftCase2',()=>glassCase({x:-1.48,z:1.05,ry:Math.PI/2,L:1.8,W:.55,H:1.0,consoles:['ps2','x360','wii'],seed:32}));
+  grab('leftCase3',()=>glassCase({x:-1.48,z:-.85,ry:Math.PI/2,L:1.8,W:.55,H:1.0,consoles:['md','snes','n64'],seed:33}));
   // RIGHT COUNTERS: low glass cases in front of the wall cases, a glass cube on top, then the ficus
-  glassCase({x:1.51,z:2.3,ry:-Math.PI/2,L:2.1,W:.55,H:.92,consoles:['psp','gba','nds'],seed:34});
-  glassCase({x:1.51,z:-.3,ry:-Math.PI/2,L:2.4,W:.55,H:.92,consoles:['saturn','dc','ps1','gc'],seed:35});
-  { const cube=new THREE.Group();cube.position.set(1.24,.92,.05);scene.add(cube);const gl=new THREE.Mesh(boxGeo(.4,.3,.4),M.glass);gl.position.y=.15;cube.add(gl);
-    add(cube,boxGeo(.42,.02,.42),M.black,0,.01,0);add(cube,boxGeo(.42,.015,.42),M.black,0,.3,0);const cm=consoleModel('dc');cm.position.y=.02;cm.scale.setScalar(.9);cube.add(cm);cm.userData.hw='dc';consoleHW.push(cm); }
+  grab('rightCase1',()=>glassCase({x:1.51,z:2.3,ry:-Math.PI/2,L:2.1,W:.55,H:.92,consoles:['psp','gba','nds'],seed:34}));
+  grab('rightCase2',()=>glassCase({x:1.51,z:-.3,ry:-Math.PI/2,L:2.4,W:.55,H:.92,consoles:['saturn','dc','ps1','gc'],seed:35}));
+  grab('glassCube',()=>{ const cube=new THREE.Group();cube.position.set(1.24,.92,.05);scene.add(cube);const gl=new THREE.Mesh(boxGeo(.4,.3,.4),M.glass);gl.position.y=.15;cube.add(gl);
+    add(cube,boxGeo(.42,.02,.42),M.black,0,.01,0);add(cube,boxGeo(.42,.015,.42),M.black,0,.3,0);const cm=consoleModel('dc');cm.position.y=.02;cm.scale.setScalar(.9);cube.add(cm);cm.userData.hw='dc';consoleHW.push(cm); });
   // white magazine table at the back right, free to browse
   magTable(1.75,-2.7);
   // shopkeeper behind the register; his old photos hang on the front wall behind him
-  salesman(-1.75,4.0,Math.PI/2);block(-2.0,3.75,-1.5,4.25);
-  keyboardCat(-1.1,1.02,4.56,Math.PI/2,.55);   // the shop cat dozing on the PC keyboard on the counter, next to the monitor, facing customers
+  salesman(-.85,3.92,Math.PI);block(-1.1,3.65,-.6,4.15);LAYOUT.shopkeeper={clerk:true,x:-.85,z:3.92,ry:Math.PI,obs:[{r:obstacles.at(-1),r0:obstacles.at(-1).slice()}]};
+  applyLayout(LAYOUT_DEFAULTS);
   [[2.3,1.95,1,.2],[2.3,1.45,3,.18]].forEach(([px,py,k,w])=>{const ph=framedPhoto(k,w);ph.rotation.y=Math.PI;ph.rotation.z=(k-2)*.012;ph.position.set(px,py,RZ-.012);scene.add(ph);});
   ['Left wall · bay 1 (front)','Left wall · bay 2','Left wall · bay 3','Left wall · bay 4','Left wall · bay 5','Left wall · bay 6','Left wall · bay 7','Left wall · bay 8 (back)',
    'Right wall · case 1 (front)','Right wall · case 2','Right wall · case 3','Right wall · case 4 (back)'].forEach((w,i)=>{if(sections[i])sections[i].where=w;});
