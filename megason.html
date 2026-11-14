@@ -882,7 +882,8 @@ function poster(lines,colors,w,h){const t=canvasTex(256,Math.round(256*h/w),(x,W
   x.textAlign='center';x.textBaseline='middle';lines.forEach(([txt,size,col],i)=>{x.font=`${size}px "Press Start 2P"`;x.lineWidth=5;x.strokeStyle='#120a1e';x.strokeText(txt,W/2,H*(.2+i*.6/Math.max(1,lines.length-1)));x.fillStyle=col;x.fillText(txt,W/2,H*(.2+i*.6/Math.max(1,lines.length-1)));});
   x.strokeStyle='#fff';x.lineWidth=6;x.strokeRect(3,3,W-6,H-6);});return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshLambertMaterial({map:t}));}
 /* real posters (LaunchBox Games Database), drawn cover-fit; the mock stays if the image can't load */
-const REAL_POSTERS={sonic2:'https://images.launchbox-app.com/r2_a1325266-2a4b-470b-91de-cb00a32399f4.png',crash:'https://images.launchbox-app.com/r2_65131e66-296c-41fe-b6a4-0c85aa7f87ec.jpg',nights:'https://images.launchbox-app.com/r2_b8def444-67e6-4269-87bb-78a15e281311.jpg',supermetroid:'https://images.launchbox-app.com/r2_94e07e08-0ac1-438e-a42d-e5806e8fbf91.jpg'};
+const REAL_POSTERS={sonic2:'https://images.launchbox-app.com/r2_a1325266-2a4b-470b-91de-cb00a32399f4.png',crash:'https://images.launchbox-app.com/r2_65131e66-296c-41fe-b6a4-0c85aa7f87ec.jpg',nights:'https://images.launchbox-app.com/r2_b8def444-67e6-4269-87bb-78a15e281311.jpg',supermetroid:'https://images.launchbox-app.com/r2_94e07e08-0ac1-438e-a42d-e5806e8fbf91.jpg',sotn:'https://images.launchbox-app.com/93d2ad80-4c41-4390-a1d7-0452c14939fe.png'};
+const ROLLUP_POOL=[['supermetroid','snes'],['sotn','ps1'],['crash','ps1'],['sonic2','md'],['nights','saturn']];   // the storefront roll-up shows one at random on each visit
 const posterImgs={};
 function posterImg(key){return posterImgs[key]||(posterImgs[key]=loadUrlImage(REAL_POSTERS[key]));}
 function drawFit(x,img,W,H){const sc=Math.max(W/img.width,H/img.height),w=img.width*sc,h=img.height*sc;x.fillStyle='#000';x.fillRect(0,0,W,H);x.drawImage(img,(W-w)/2,(H-h)/2,w,h);}
@@ -1731,7 +1732,7 @@ const SF=(()=>{
       for(let i=0;i<4;i++)for(let j=0;j<4;j++){x.fillStyle=`hsl(30,4%,${34+rnd()*8}%)`;x.fillRect(i*q+2,j*q+2,q-4,q-4);}
       for(let n=0;n<1600;n++){x.fillStyle=rnd()<.5?'rgba(0,0,0,.12)':'rgba(255,255,255,.08)';x.fillRect(rnd()*w,rnd()*h,2,2);}},[12,9]);
     const street=pl(32,24,std({map:paveT,roughness:.85}),0,0,RZ+12);street.rotation.x=-Math.PI/2;
-    rollupStand(2.42,F+.55,-.22,'supermetroid','SUPER NINTENDO');   // roll-up banner on the pavement, just right of the door
+    {const [pk,sys]=ROLLUP_POOL[Math.floor(Math.random()*ROLLUP_POOL.length)];rollupStand(-2.48,F+.55,.22,pk,PLAT[sys].name.toUpperCase());}   // roll-up banner on the pavement, left of the window: a different real poster every visit
     const brickT=ctex(256,256,(x,w,h)=>{x.fillStyle='#1e1614';x.fillRect(0,0,w,h);const bh=21,bw=64;
       for(let r=0;r<Math.ceil(h/bh);r++)for(let c=-1;c<w/bw+1;c++){const o=(r%2)*bw/2;x.fillStyle=`hsl(${12+rnd()*14},${14+rnd()*14}%,${17+rnd()*12}%)`;x.fillRect(c*bw+o+2,r*bh+2,bw-4,bh-4);}
       for(let n=0;n<900;n++){x.fillStyle='rgba(0,0,0,.15)';x.fillRect(rnd()*w,rnd()*h,2,2);}});
