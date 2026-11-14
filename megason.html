@@ -1178,19 +1178,18 @@ function rollup(x,z){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.
   add(g,boxGeo(.9,.07,.16),M.chrome,0,.035,0);add(g,boxGeo(.05,.02,.34),M.chrome,-.36,.01,0);add(g,boxGeo(.05,.02,.34),M.chrome,.36,.01,0);
   add(g,boxGeo(.87,.03,.025),M.chrome,0,2.085,0);const pole=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,2.02,8),M.chrome);pole.position.set(0,1.06,-.03);g.add(pole);
   block(x-.48,z-.22,x+.48,z+.22);}
-/* a floor-standing roll-up banner carrying a real game poster: store header, the poster, a "now in stock" footer */
+/* a floor-standing roll-up banner carrying a real game poster: the poster on top, a "now in stock" footer */
 function rollupStand(x,z,ry,key,foot){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
   const W=.85,H=2,CW=510,CH=1200,c=document.createElement('canvas');c.width=CW;c.height=CH;const cx=c.getContext('2d');
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=MAXANISO;
   const draw=img=>{const bg=cx.createLinearGradient(0,0,0,CH);bg.addColorStop(0,'#0b0d24');bg.addColorStop(1,'#1b1f49');cx.fillStyle=bg;cx.fillRect(0,0,CW,CH);
-    const ph=Math.round(CW*1.5),py=150;   // poster area, 2:3
+    const ph=900,py=0;   // poster area from the top edge
     if(img){const sc=Math.max(CW/img.width,ph/img.height),w=img.width*sc,h=img.height*sc;cx.save();cx.beginPath();cx.rect(0,py,CW,ph);cx.clip();cx.drawImage(img,(CW-w)/2,py+(ph-h)/2,w,h);cx.restore();}
     else{cx.fillStyle='#14173a';cx.fillRect(0,py,CW,ph);}
-    cx.fillStyle='#ffd23f';cx.fillRect(0,py-8,CW,8);cx.fillRect(0,py+ph,CW,8);
+    cx.fillStyle='#ffd23f';cx.fillRect(0,py+ph,CW,8);
     cx.textAlign='center';cx.textBaseline='middle';
-    cx.fillStyle='#fff';cx.font='86px "Archivo Black",Impact,sans-serif';cx.fillText('MEGASON',CW/2,72);
-    cx.fillStyle='#ffd23f';cx.font='46px "Archivo Black",Impact,sans-serif';cx.fillText('NOW IN STOCK',CW/2,py+ph+70);
-    cx.fillStyle='#aeb4d6';cx.font='26px "Press Start 2P",monospace';cx.fillText(foot,CW/2,py+ph+138);
+    cx.fillStyle='#ffd23f';cx.font='46px "Archivo Black",Impact,sans-serif';cx.fillText('NOW IN STOCK',CW/2,py+ph+105);
+    cx.fillStyle='#aeb4d6';cx.font='26px "Press Start 2P",monospace';cx.fillText(foot,CW/2,py+ph+190);
     tex.needsUpdate=true;};
   draw(null);
   const front=new THREE.Mesh(new THREE.PlaneGeometry(W,H),new THREE.MeshLambertMaterial({map:tex,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:.2}));front.position.set(0,1.07,0);g.add(front);
