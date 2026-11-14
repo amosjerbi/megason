@@ -1829,6 +1829,14 @@ const SF=(()=>{
       const pts=[new THREE.Vector3(0,.012,-.04),new THREE.Vector3(.02,.008,-.12),new THREE.Vector3(-.03,.006,-.22),new THREE.Vector3(.01,.006,-.32)];
       add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),24,.0045,6),dM,0,0,0,g);};
     pad(crtX+.4,ZF+.13,-.35,0);pad(rx-.5,ZF+.15,.25,1);
+    /* front row: loose consoles and boxed consoles (real box scans) between the pads */
+    const deckConsole=(t,x,z,ry,sc=1)=>{const m=consoleModel(t);m.position.set(x,D0,z);m.rotation.y=ry;m.scale.setScalar(sc);G.add(m);};
+    const deckBox=(sys,x,z,ry)=>{const e=CONSOLE_SCANS.find(c=>c[0]===sys);if(!e)return;const m=realConsoleBox(e,.5,.4);const [,bh]=m.userData.size;m.position.set(x,D0+bh/2+.001,z);m.rotation.y=ry;G.add(m);};
+    deckConsole('md',W0+.32,ZF+.12,.3,1.5);
+    deckBox('GENESIS',W0+.85,ZF+.02,.12);
+    deckConsole('n64',crtX-.3,ZF+.13,-.15,1.45);
+    deckBox('DREAMCAST',rx-.1,ZF+.02,-.14);
+    deckConsole('ps1',W1-.24,ZF+.13,-.3,1.5);
     fairyOn=basic({color:0xffe2a8,toneMapped:false});fairyDim=basic({color:0xb88a4a,toneMapped:false});
     const fg=new THREE.SphereGeometry(.02,8,6);
     for(const [z,sag] of [[F-.12,.2],[RZ+.15,.26]]){const pts=[];
