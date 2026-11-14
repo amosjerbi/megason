@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Give every game in the Megason store its gameplay screenshots and a flat
+"""Give every game in the Megason store its gameplay screenshots, its back cover and a flat
 disc / cartridge image, taken from the LaunchBox Games Database.
 
 Usage
@@ -28,6 +28,7 @@ PLATFORMS = {
 }
 DISC = {"saturn", "ps1", "gc", "dc", "ps2", "x360", "psp", "wii"}  # everything else is a cartridge
 MEDIA_TYPES = {True: ["Disc", "Fanart - Disc"], False: ["Cart - Front", "Fanart - Cart - Front", "Cart - 3D"]}
+BACK_TYPES = ["Box - Back", "Box - Back - Reconstructed"]
 SHOT_TYPES = ["Screenshot - Gameplay", "Screenshot - Game Select", "Screenshot - Game Title"]
 REGIONS = ["World", "North America", "United States", "Europe", "United Kingdom", "Japan", None, ""]
 MARK = "<!--PV_MEDIA-->"
@@ -109,7 +110,7 @@ def main():
                         games.setdefault((k, norm(title)), el.findtext("DatabaseID"))
                 elif el.tag == "GameImage":
                     t = el.findtext("Type")
-                    if t in SHOT_TYPES or t in MEDIA_TYPES[True] or t in MEDIA_TYPES[False]:
+                    if t in SHOT_TYPES or t in BACK_TYPES or t in MEDIA_TYPES[True] or t in MEDIA_TYPES[False]:
                         imgs.setdefault(el.findtext("DatabaseID"), []).append((t, el.findtext("Region"), el.findtext("FileName")))
                 el.clear()
 
@@ -127,8 +128,14 @@ def main():
             if got:
                 md = got[0]
                 break
-        if shots or md:
-            media[f"{k}|{nt}"] = {"s": shots[:4], "m": md}
+        back = None
+        for bt in BACK_TYPES:
+            got = pick([(r, fn) for t, r, fn in lst if t == bt], 1)
+            if got:
+                back = got[0]
+                break
+        if shots or md or back:
+            media[f"{k}|{nt}"] = {"s": shots[:4], "m": md, "b": back}
             found += 1
     data = {"base": IMG_BASE, "games": media}
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
