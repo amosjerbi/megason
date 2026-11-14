@@ -1178,7 +1178,7 @@ function rollup(x,z){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.
   add(g,boxGeo(.9,.07,.16),M.chrome,0,.035,0);add(g,boxGeo(.05,.02,.34),M.chrome,-.36,.01,0);add(g,boxGeo(.05,.02,.34),M.chrome,.36,.01,0);
   add(g,boxGeo(.87,.03,.025),M.chrome,0,2.085,0);const pole=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,2.02,8),M.chrome);pole.position.set(0,1.06,-.03);g.add(pole);
   block(x-.48,z-.22,x+.48,z+.22);}
-/* a floor-standing roll-up banner carrying a real game poster: the poster on top, a "now in stock" footer */
+/* a floor-standing roll-up banner carrying a real game poster: the poster on top, an "in the store now" footer in Hebrew */
 function rollupStand(x,z,ry,key,foot){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
   const W=.85,H=2,CW=510,CH=1200,c=document.createElement('canvas');c.width=CW;c.height=CH;const cx=c.getContext('2d');
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=MAXANISO;
@@ -1188,7 +1188,7 @@ function rollupStand(x,z,ry,key,foot){const g=new THREE.Group();g.position.set(x
     else{cx.fillStyle='#14173a';cx.fillRect(0,py,CW,ph);}
     cx.fillStyle='#ffd23f';cx.fillRect(0,py+ph,CW,8);
     cx.textAlign='center';cx.textBaseline='middle';
-    cx.fillStyle='#ffd23f';cx.font='46px "Archivo Black",Impact,sans-serif';cx.fillText('NOW IN STOCK',CW/2,py+ph+105);
+    cx.fillStyle='#ffd23f';cx.font='bold 58px "Arial Hebrew",Arial,sans-serif';cx.direction='rtl';cx.fillText('עכשיו בחנות',CW/2,py+ph+105);cx.direction='ltr';
     cx.fillStyle='#aeb4d6';cx.font='26px "Press Start 2P",monospace';cx.fillText(foot,CW/2,py+ph+190);
     tex.needsUpdate=true;};
   draw(null);
@@ -1726,12 +1726,11 @@ const SF=(()=>{
       [[0,0],[.32,0],[.36,.5],[.42,0],[.5,0],[.53,.25],[.56,0],[1,0]].forEach(([o,a])=>g.addColorStop(o,`rgba(255,255,255,${a})`));x.fillStyle=g;x.fillRect(0,0,w,h);});
     const streakM=basic({map:streakT,transparent:true,opacity:.16,blending:THREE.AdditiveBlending,depthWrite:false});
 
-    /* mall floor: big glossy cream tiles with thin grout (2x2 tiles per texture, 0.8 m each) */
-    const tileT=ctex(512,512,(x,w,h)=>{x.fillStyle='#a39a8c';x.fillRect(0,0,w,h);const q=w/2;
-      for(let i=0;i<2;i++)for(let j=0;j<2;j++){const l=72+rnd()*4;x.fillStyle=`hsl(36,${16+rnd()*6}%,${l}%)`;x.fillRect(i*q+2,j*q+2,q-4,q-4);
-        for(let n=0;n<5;n++){x.strokeStyle=`rgba(150,135,115,${.05+rnd()*.06})`;x.lineWidth=1+rnd()*2;x.beginPath();let px=i*q+rnd()*q,py=j*q+rnd()*q;x.moveTo(px,py);for(let k=0;k<6;k++){px+=(rnd()-.5)*60;py+=(rnd()-.3)*40;x.lineTo(px,py);}x.stroke();}}
-      for(let n=0;n<2200;n++){x.fillStyle=rnd()<.5?'rgba(0,0,0,.035)':'rgba(255,255,255,.07)';x.fillRect(rnd()*w,rnd()*h,2,2);}},[20,15]);
-    const street=pl(32,24,std({map:tileT,roughness:.16,metalness:.05}),0,0,RZ+12);street.rotation.x=-Math.PI/2;
+    /* street */
+    const paveT=ctex(256,256,(x,w,h)=>{x.fillStyle='#4a4846';x.fillRect(0,0,w,h);const q=w/4;
+      for(let i=0;i<4;i++)for(let j=0;j<4;j++){x.fillStyle=`hsl(30,4%,${34+rnd()*8}%)`;x.fillRect(i*q+2,j*q+2,q-4,q-4);}
+      for(let n=0;n<1600;n++){x.fillStyle=rnd()<.5?'rgba(0,0,0,.12)':'rgba(255,255,255,.08)';x.fillRect(rnd()*w,rnd()*h,2,2);}},[12,9]);
+    const street=pl(32,24,std({map:paveT,roughness:.85}),0,0,RZ+12);street.rotation.x=-Math.PI/2;
     {const [pk,sys]=ROLLUP_POOL[Math.floor(Math.random()*ROLLUP_POOL.length)];rollupStand(-2.48,F+.55,.22,pk,PLAT[sys].name.toUpperCase());}   // roll-up banner on the pavement, left of the window: a different real poster every visit
     /* walls either side: plain dark brown, a darker skirting strip at the floor */
     const wallM=std({color:0x3b2a20,roughness:.8});
