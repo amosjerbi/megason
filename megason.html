@@ -1370,13 +1370,13 @@ function buildStore(){
   [[2.6,'sonic2',['TRADE','IN!'],['#0b3fb3','#00b4ff']],[-3.0,'crash',['RETRO','DAYS'],['#7a1460','#ff7a1a']]].forEach(([z,key,[a,b],cols])=>realPoster(key,poster([[a,22,'#ffd23f'],[b,22,'#fff']],cols,.46,.69),.46,.69,RX-.012,2.6,z,-Math.PI/2));
   wallPoster(RX-.015,2.6,-.2,-Math.PI/2,.5,.7);
   posterImg('nights').then(img=>{rollupDefImg=img;if(!rollupBlob){drawRollupDefault();rollupTex.needsUpdate=true;}}).catch(()=>{});
-  // LEFT COUNTER RUN: register at the front, then black-framed glass cases
+  // LEFT COUNTER RUN: register at the front, then black-framed glass cases butted end to end (no gaps)
   registerArea();
-  grab('leftCase1',()=>{glassCase({x:-1.48,z:2.95,ry:Math.PI/2,L:1.8,W:.55,H:1.0,plat:'mix',seed:31});keyboardCat(-1.2,1.02,2.0,Math.PI/2,.55);ITEMS.cat={g:scene.children.at(-1)};});   // the shop cat dozing on its keyboard on top of the first case, facing customers
-  grab('leftCase2',()=>glassCase({x:-1.48,z:1.05,ry:Math.PI/2,L:1.8,W:.55,H:1.0,consoles:['ps2','x360','wii'],seed:32}));
-  grab('leftCase3',()=>glassCase({x:-1.48,z:-.85,ry:Math.PI/2,L:1.8,W:.55,H:1.0,consoles:['md','snes','n64'],seed:33}));
+  grab('leftCase1',()=>{glassCase({x:-1.48,z:2.97,ry:Math.PI/2,L:1.8,W:.55,H:1.0,plat:'mix',seed:31});keyboardCat(-1.2,1.02,2.0,Math.PI/2,.55);ITEMS.cat={g:scene.children.at(-1)};});   // the shop cat dozing on its keyboard on top of the first case, facing customers
+  grab('leftCase2',()=>glassCase({x:-1.48,z:1.17,ry:Math.PI/2,L:1.8,W:.55,H:1.0,consoles:['ps2','x360','wii'],seed:32}));
+  grab('leftCase3',()=>glassCase({x:-1.48,z:-.63,ry:Math.PI/2,L:1.8,W:.55,H:1.0,consoles:['md','snes','n64'],seed:33}));
   // RIGHT COUNTERS: low glass cases in front of the wall cases, a glass cube on top, then the ficus
-  grab('rightCase1',()=>glassCase({x:1.51,z:2.3,ry:-Math.PI/2,L:2.1,W:.55,H:.92,consoles:['psp','gba','nds'],seed:34}));
+  grab('rightCase1',()=>glassCase({x:1.51,z:2.1,ry:-Math.PI/2,L:2.1,W:.55,H:.92,consoles:['psp','gba','nds'],seed:34}));
   grab('rightCase2',()=>glassCase({x:1.51,z:-.3,ry:-Math.PI/2,L:2.4,W:.55,H:.92,consoles:['saturn','dc','ps1','gc'],seed:35}));
   grab('glassCube',()=>{ const cube=new THREE.Group();cube.position.set(1.24,.92,.05);scene.add(cube);const gl=new THREE.Mesh(boxGeo(.4,.3,.4),M.glass);gl.position.y=.15;cube.add(gl);
     add(cube,boxGeo(.42,.02,.42),M.black,0,.01,0);add(cube,boxGeo(.42,.015,.42),M.black,0,.3,0);const cm=consoleModel('dc');cm.position.y=.02;cm.scale.setScalar(.9);cube.add(cm);cm.userData.hw='dc';consoleHW.push(cm); });
