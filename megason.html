@@ -1755,7 +1755,7 @@ const SF=(()=>{
     pl(W1-W0,WTOP-SILL,glassM,(W0+W1)/2,(WTOP+SILL)/2,F-.02);pl(W1-W0,WTOP-SILL,streakM,(W0+W1)/2,(WTOP+SILL)/2,F-.014);
     span(W0,W1,WTOP-.06,WTOP,RZ,F,darkWoodM);              // alcove ceiling
     span(dL,dR,WTOP-.06,WTOP,RZ,F,darkWoodM);              // entrance soffit
-    span(dL,dR,DH,WTOP-.06,RZ+.005,RZ+.05,woodM);          // transom above the door
+    span(dL,dR,DH,WTOP-.06,F-.07,F-.02,woodM);             // transom above the door, flush with the display window
     span(dL-.02,dR+.02,0,.04,RZ,F,std({color:0x5a5450,roughness:.8})); // threshold step
 
     /* the sign: the logo glowing like neon */
@@ -1837,7 +1837,7 @@ const SF=(()=>{
       for(let i=0;i<=28;i++){const u=i/28,x=W0+.05+u*(W1-W0-.1),y=WTOP-.1-sag*4*u*(1-u)*(1+.15*Math.sin(u*18));pts.push(new THREE.Vector3(x,y,z));fairy.push(add(fg,fairyOn,x,y-.03,z));}
       G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x1a1410})));}
 
-    /* the door: wood frame, glass, pixel stickers; hinged at the left jamb, swings inward */
+    /* the door: wood frame, glass, pixel stickers; hinged at the left jamb, swings outward */
     stickT=ctex(256,320,(x,w,h)=>{x.clearRect(0,0,w,h);
       const SPR=[['..aaaa..','.abbbba.','abcbbcba','abbbbbba','.abddba.','..bbbb..','.e.ee.e.','.e....e.'],['...ff...','..ffff..','.fgffgf.','.ffffff.','ffhhhhff','.ff..ff.','.ii..ii.','........'],
                  ['.jjjjjj.','jkjjjjkj','jjjjjjjj','.jlllj..','..jjjj..','.mjjjjm.','.m.jj.m.','..m..m..'],['..nnnn..','.nooooon','noponpon','noooooon','.nqqqqn.','..nnnn..','.n.nn.n.','n......n']];
@@ -1845,7 +1845,7 @@ const SF=(()=>{
       SPR.forEach((sp,si)=>{const ox=24+(si%2)*118,oy=20+Math.floor(si/2)*84;sp.forEach((row,ry)=>[...row].forEach((ch,c)=>{if(PAL[ch]){x.fillStyle=PAL[ch];x.fillRect(ox+c*7,oy+ry*7,7,7);}}));});
       x.fillStyle='rgba(250,240,220,.92)';x.fillRect(40,206,176,70);x.fillStyle='#2a1a10';x.textAlign='center';x.textBaseline='middle';
       x.font='bold 26px "Arial Hebrew",Arial,sans-serif';x.fillText('פתוח',w/2,228);x.font=`10px ${PIX}`;x.fillText('OPEN 10-20',w/2,258);});
-    door=new THREE.Group();door.position.set(dL,0,RZ);G.add(door);
+    door=new THREE.Group();door.position.set(dL,0,F-.045);G.add(door);   // on the same plane as the display window glass
     const dg=new THREE.Group();dg.position.set(DOORW/2,0,0);door.add(dg);const DW=DOORW;
     bx(DW,.1,.06,woodM,0,DH-.05,0,dg);bx(DW,.25,.06,woodM,0,.125,0,dg);bx(.1,DH,.06,woodM,-DW/2+.05,DH/2,0,dg);bx(.1,DH,.06,woodM,DW/2-.05,DH/2,0,dg);
     const dgl=pl(DW-.2,DH-.35,glassM,0,DH/2+.07,0,dg);dgl.material=glassM.clone();dgl.material.side=THREE.DoubleSide;
@@ -1905,7 +1905,7 @@ const SF=(()=>{
     let open=0,move=0;
     if(anim){const k=cl((now-anim.t0)/2300);open=ease(cl(k/.3));move=ease(cl((k-.08)/.92));startEl.style.opacity=String(1-cl(k/.25));
       if(k>=1){const d=anim.done;anim=null;active=false;startEl.style.display='none';startEl.style.opacity='1';door.rotation.y=0;setMood(1);camera.clearViewOffset();camera.fov=fovFor(camera.aspect);camera.updateProjectionMatrix();d();return;}}
-    door.rotation.y=open*1.4;setMood(move);
+    door.rotation.y=-open*1.4;setMood(move);   // swings out into the mall (the passage behind it is too shallow to open inward)
     idle.copy(base);
     endP.set(player.x,1.6,player.z);endL.set(player.x-Math.sin(player.yaw)*Math.cos(player.pitch),1.6+Math.sin(player.pitch),player.z-Math.cos(player.yaw)*Math.cos(player.pitch));
     if(move>0){const c=new THREE.CatmullRomCurve3([idle.clone(),new THREE.Vector3(DOORX,1.62,F+1.4),new THREE.Vector3(DOORX,1.6,RZ-.25),endP.clone()]);c.getPoint(move,camera.position);
