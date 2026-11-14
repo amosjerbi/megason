@@ -1752,7 +1752,6 @@ const SF=(()=>{
     span(-FX-.1,FX+.1,WTOP-.02,WTOP+.1,Z0,F+.14,woodM);     // lintel
     span(W0,W1,0,SILL,F-.3,F,woodM);                       // stall riser
     span(W0-.02,W1+.02,SILL,SILL+.06,F-.9,F+.08,woodM);   // sill / display deck
-    for(let i=0;i<3;i++){const a=W0+(i+.08)*(W1-W0)/3,b=W0+(i+.92)*(W1-W0)/3;span(a,b,.1,SILL-.08,F,F+.02,darkWoodM);}
     pl(W1-W0,WTOP-SILL,glassM,(W0+W1)/2,(WTOP+SILL)/2,F-.02);pl(W1-W0,WTOP-SILL,streakM,(W0+W1)/2,(WTOP+SILL)/2,F-.014);
     span(W0,W1,WTOP-.06,WTOP,RZ,F,darkWoodM);              // alcove ceiling
     span(dL,dR,WTOP-.06,WTOP,RZ,F,darkWoodM);              // entrance soffit
