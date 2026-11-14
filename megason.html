@@ -882,7 +882,7 @@ function poster(lines,colors,w,h){const t=canvasTex(256,Math.round(256*h/w),(x,W
   x.textAlign='center';x.textBaseline='middle';lines.forEach(([txt,size,col],i)=>{x.font=`${size}px "Press Start 2P"`;x.lineWidth=5;x.strokeStyle='#120a1e';x.strokeText(txt,W/2,H*(.2+i*.6/Math.max(1,lines.length-1)));x.fillStyle=col;x.fillText(txt,W/2,H*(.2+i*.6/Math.max(1,lines.length-1)));});
   x.strokeStyle='#fff';x.lineWidth=6;x.strokeRect(3,3,W-6,H-6);});return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshLambertMaterial({map:t}));}
 /* real posters (LaunchBox Games Database), drawn cover-fit; the mock stays if the image can't load */
-const REAL_POSTERS={sonic2:'https://images.launchbox-app.com/r2_a1325266-2a4b-470b-91de-cb00a32399f4.png',crash:'https://images.launchbox-app.com/r2_65131e66-296c-41fe-b6a4-0c85aa7f87ec.jpg',nights:'https://images.launchbox-app.com/r2_b8def444-67e6-4269-87bb-78a15e281311.jpg'};
+const REAL_POSTERS={sonic2:'https://images.launchbox-app.com/r2_a1325266-2a4b-470b-91de-cb00a32399f4.png',crash:'https://images.launchbox-app.com/r2_65131e66-296c-41fe-b6a4-0c85aa7f87ec.jpg',nights:'https://images.launchbox-app.com/r2_b8def444-67e6-4269-87bb-78a15e281311.jpg',supermetroid:'https://images.launchbox-app.com/r2_94e07e08-0ac1-438e-a42d-e5806e8fbf91.jpg'};
 const posterImgs={};
 function posterImg(key){return posterImgs[key]||(posterImgs[key]=loadUrlImage(REAL_POSTERS[key]));}
 function drawFit(x,img,W,H){const sc=Math.max(W/img.width,H/img.height),w=img.width*sc,h=img.height*sc;x.fillStyle='#000';x.fillRect(0,0,W,H);x.drawImage(img,(W-w)/2,(H-h)/2,w,h);}
@@ -1177,6 +1177,28 @@ function rollup(x,z){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.
   add(g,boxGeo(.9,.07,.16),M.chrome,0,.035,0);add(g,boxGeo(.05,.02,.34),M.chrome,-.36,.01,0);add(g,boxGeo(.05,.02,.34),M.chrome,.36,.01,0);
   add(g,boxGeo(.87,.03,.025),M.chrome,0,2.085,0);const pole=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,2.02,8),M.chrome);pole.position.set(0,1.06,-.03);g.add(pole);
   block(x-.48,z-.22,x+.48,z+.22);}
+/* a floor-standing roll-up banner carrying a real game poster: store header, the poster, a "now in stock" footer */
+function rollupStand(x,z,ry,key,foot){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
+  const W=.85,H=2,CW=510,CH=1200,c=document.createElement('canvas');c.width=CW;c.height=CH;const cx=c.getContext('2d');
+  const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=MAXANISO;
+  const draw=img=>{const bg=cx.createLinearGradient(0,0,0,CH);bg.addColorStop(0,'#0b0d24');bg.addColorStop(1,'#1b1f49');cx.fillStyle=bg;cx.fillRect(0,0,CW,CH);
+    const ph=Math.round(CW*1.5),py=150;   // poster area, 2:3
+    if(img){const sc=Math.max(CW/img.width,ph/img.height),w=img.width*sc,h=img.height*sc;cx.save();cx.beginPath();cx.rect(0,py,CW,ph);cx.clip();cx.drawImage(img,(CW-w)/2,py+(ph-h)/2,w,h);cx.restore();}
+    else{cx.fillStyle='#14173a';cx.fillRect(0,py,CW,ph);}
+    cx.fillStyle='#ffd23f';cx.fillRect(0,py-8,CW,8);cx.fillRect(0,py+ph,CW,8);
+    cx.textAlign='center';cx.textBaseline='middle';
+    cx.fillStyle='#fff';cx.font='86px "Archivo Black",Impact,sans-serif';cx.fillText('MEGASON',CW/2,72);
+    cx.fillStyle='#ffd23f';cx.font='46px "Archivo Black",Impact,sans-serif';cx.fillText('NOW IN STOCK',CW/2,py+ph+70);
+    cx.fillStyle='#aeb4d6';cx.font='26px "Press Start 2P",monospace';cx.fillText(foot,CW/2,py+ph+138);
+    tex.needsUpdate=true;};
+  draw(null);
+  const front=new THREE.Mesh(new THREE.PlaneGeometry(W,H),new THREE.MeshLambertMaterial({map:tex,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:.2}));front.position.set(0,1.07,0);g.add(front);
+  const back=new THREE.Mesh(new THREE.PlaneGeometry(W,H),new THREE.MeshLambertMaterial({color:0x8d8f94}));back.position.set(0,1.07,-.002);back.rotation.y=Math.PI;g.add(back);
+  add(g,boxGeo(W+.05,.07,.16),M.chrome,0,.035,0);add(g,boxGeo(.05,.02,.34),M.chrome,-.36,.01,0);add(g,boxGeo(.05,.02,.34),M.chrome,.36,.01,0);
+  add(g,boxGeo(W+.02,.03,.025),M.chrome,0,2.085,0);const pole=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,2.02,8),M.chrome);pole.position.set(0,1.06,-.03);g.add(pole);
+  const cs=Math.abs(Math.cos(ry)),sn=Math.abs(Math.sin(ry)),hx=.48*cs+.2*sn,hz=.48*sn+.2*cs;block(x-hx,z-hz,x+hx,z+hz);
+  posterImg(key).then(img=>{draw(img);if(!canUse(cx))draw(null);}).catch(()=>{});
+  if(document.fonts)document.fonts.ready.then(()=>posterImgs[key]?posterImgs[key].then(img=>{draw(img);if(!canUse(cx))draw(null);},()=>draw(null)):draw(null));}
 async function setRollup(blob,save=true){const img=await loadBitmap(blob);const x=rollupCtx,sc=Math.max(RUW/img.width,RUH/img.height),w=img.width*sc,h=img.height*sc;
   x.fillStyle='#000';x.fillRect(0,0,RUW,RUH);x.drawImage(img,(RUW-w)/2,(RUH-h)/2,w,h);rollupTex.needsUpdate=true;rollupBlob=blob;if(save)dbPut('rollup',{blob});}
 let setTab='shelves';
@@ -1287,6 +1309,8 @@ function buildStore(){
     add(cube,boxGeo(.42,.02,.42),M.black,0,.01,0);add(cube,boxGeo(.42,.015,.42),M.black,0,.3,0);const cm=consoleModel('dc');cm.position.y=.02;cm.scale.setScalar(.9);cube.add(cm);cm.userData.hw='dc';consoleHW.push(cm); }
   // white magazine table at the back right, free to browse
   magTable(1.75,-2.7);
+  // roll-up banner at the front of the aisle, turned towards the door
+  rollupStand(-.45,2.7,.3,'supermetroid','SUPER NINTENDO');
   // shopkeeper behind the register; his old photos hang on the front wall behind him
   salesman(-1.75,4.0,Math.PI/2);block(-2.0,3.75,-1.5,4.25);
   keyboardCat(-1.1,1.02,4.56,Math.PI/2,.55);   // the shop cat dozing on the PC keyboard on the counter, next to the monitor, facing customers
