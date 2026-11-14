@@ -1733,8 +1733,13 @@ const SF=(()=>{
     const street=pl(32,24,std({map:paveT,roughness:.85}),0,0,RZ+12);street.rotation.x=-Math.PI/2;
     {const [pk,sys]=ROLLUP_POOL[Math.floor(Math.random()*ROLLUP_POOL.length)];rollupStand(-2.48,F+.55,.22,pk,PLAT[sys].name.toUpperCase());}   // roll-up banner on the pavement, left of the window: a different real poster every visit
     /* walls either side: plain dark brown, a darker skirting strip at the floor */
-    const wallM=std({color:0x3b2a20,roughness:.8});
-    const wall=(x0,x1,y0,y1,z0,z1)=>span(x0,x1,y0,y1,z0,z1,wallM);
+    /* painted cinder block: 40x20 cm blocks in running bond, painted dark brown */
+    const wallT=ctex(512,512,(x,w,h)=>{x.fillStyle='#22160f';x.fillRect(0,0,w,h);const bw=256,bh=128,m=7;
+      for(let r=0;r<4;r++)for(let c=-1;c<3;c++){const o=(r%2)*bw/2,X=c*bw+o+m/2,Y=r*bh+m/2,W=bw-m,H=bh-m;
+        x.fillStyle=`hsl(22,${26+rnd()*6}%,${19+rnd()*3}%)`;x.fillRect(X,Y,W,H);
+        x.fillStyle='rgba(255,230,200,.07)';x.fillRect(X,Y,W,5);x.fillStyle='rgba(0,0,0,.22)';x.fillRect(X,Y+H-6,W,6);x.fillRect(X+W-4,Y,4,H);
+        for(let n=0;n<220;n++){x.fillStyle=rnd()<.6?'rgba(0,0,0,.18)':'rgba(255,235,210,.06)';const sz=1+rnd()*3;x.fillRect(X+rnd()*W,Y+rnd()*H,sz,sz);}}});
+    const wall=(x0,x1,y0,y1,z0,z1)=>{const t=wallT.clone();t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set((x1-x0)/.8,(y1-y0)/.8);t.needsUpdate=true;return span(x0,x1,y0,y1,z0,z1,std({map:t,roughness:.85}));};
     const Z0=RZ+.01;
     wall(-15,-FX,0,9,Z0,F);wall(FX,15,0,9,Z0,F);wall(-FX,FX,WTOP+1.5,9,Z0,F-.02);
     const skirtM=std({color:0x1c140f,roughness:.5});span(-15,-FX,0,.14,Z0,F+.015,skirtM);span(FX,15,0,.14,Z0,F+.015,skirtM);
