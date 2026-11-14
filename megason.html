@@ -1852,7 +1852,8 @@ const SF=(()=>{
       const PAL={a:'#2a2a6e',b:'#f2c9a0',c:'#111',d:'#d7263d',e:'#3a86ff',f:'#06d6a0',g:'#111',h:'#ffd23f',i:'#118ab2',j:'#c0c0c8',k:'#ff006e',l:'#222',m:'#8a8a94',n:'#ff6b35',o:'#ffd166',p:'#111',q:'#d7263d'};
       SPR.forEach((sp,si)=>{const ox=24+(si%2)*118,oy=20+Math.floor(si/2)*84;sp.forEach((row,ry)=>[...row].forEach((ch,c)=>{if(PAL[ch]){x.fillStyle=PAL[ch];x.fillRect(ox+c*7,oy+ry*7,7,7);}}));});
       x.fillStyle='rgba(250,240,220,.92)';x.fillRect(40,206,176,70);x.fillStyle='#2a1a10';x.textAlign='center';x.textBaseline='middle';
-      x.font='bold 26px "Arial Hebrew",Arial,sans-serif';x.fillText('פתוח',w/2,228);x.font=`10px ${PIX}`;x.fillText('OPEN 10-20',w/2,258);});
+      x.font='bold 24px "Arial Hebrew",Arial,sans-serif';x.fillText('פתוח',w/2,222);
+      x.direction='rtl';x.font='bold 14px "Arial Hebrew",Arial,sans-serif';x.fillText('א-ה 10:00-21:00',w/2,246);x.fillText('ו 10:00-15:00',w/2,264);x.direction='ltr';});
     door=new THREE.Group();door.position.set(dR,0,F-.045);G.add(door);   // on the same plane as the display window glass, hinged at the right jamb
     const dg=new THREE.Group();dg.position.set(-DOORW/2,0,0);door.add(dg);const DW=DOORW;
     bx(DW,.1,.06,woodM,0,DH-.05,0,dg);bx(DW,.25,.06,woodM,0,.125,0,dg);bx(.1,DH,.06,woodM,-DW/2+.05,DH/2,0,dg);bx(.1,DH,.06,woodM,DW/2-.05,DH/2,0,dg);
