@@ -197,6 +197,11 @@
   .fbtn.pri{border-color:transparent;background:linear-gradient(135deg,#ffe066,#ffc928);color:#17112e;font-weight:600;box-shadow:0 8px 24px rgba(255,201,40,.22)}
   .fbtn.pri:hover{filter:brightness(1.08)}
   #setDone{min-width:150px}
+  .fsel{position:relative;display:inline-flex;align-items:center;height:46px;border-radius:14px;border:1px solid rgba(255,224,102,.55);background:rgba(255,224,102,.08);color:#fff}
+  .fsel:hover{background:rgba(255,224,102,.14)}
+  .fsel .ic{position:absolute;left:16px;pointer-events:none;stroke:#ffe066}
+  .fsel select{width:200px;max-width:none;min-width:0;margin:0;height:100%;padding:0 40px 0 46px;-webkit-appearance:none;appearance:none;border:0;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center/16px;color:#fff;font:500 15px Inter,system-ui,sans-serif;cursor:pointer;border-radius:14px}
+  .fsel select option{background:#151838}
   @media (max-height:940px){#settings .main{padding-top:18px}#settings .mhead{margin-bottom:12px;padding-bottom:10px}#settings .mhead h1{font-size:26px}#shelfList .srow{padding-top:9px;padding-bottom:9px}#settings .sfoot{padding-top:10px;padding-bottom:10px}#settings .side{padding-top:20px}}
   @media (max-height:800px){#settings .mhead p{display:none}#settings .mhead h1{font-size:22px}#shelfList .srow{padding-top:6px;padding-bottom:6px}#shelfList .sctl{margin-top:3px}#settings input[type=range]{margin:5px 0 2px}#shelfList .ghead{font-size:15px}#shelfList .ghead:not(:first-child){margin-top:4px}#settings .fbtn{height:40px}#setX{top:12px;width:38px;height:38px}}
   @media (max-width:1020px){#shelfList{grid-template-columns:1fr;gap:8px}#settings .cards{grid-template-columns:1fr}}
@@ -348,6 +353,7 @@
   <footer class="sfoot">
     <div class="note"><svg class="info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16.5v-5M12 7.5h.01"/></svg><span id="setNote">Changes apply immediately.</span></div>
     <div class="fgroup" data-for="shelves">
+      <label class="fsel" title="Stock every bay with one system"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></svg><select id="allSys" aria-label="Put one system on all bays"></select></label>
       <button class="fbtn" id="shuffleAll"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg>Shuffle All</button>
       <button class="fbtn" id="randomAll"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" class="dot"/><circle cx="15.5" cy="8.5" r="1.2" class="dot"/><circle cx="12" cy="12" r="1.2" class="dot"/><circle cx="8.5" cy="15.5" r="1.2" class="dot"/><circle cx="15.5" cy="15.5" r="1.2" class="dot"/></svg>Random Systems</button>
       <button class="fbtn" id="resetShelves"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Reset</button>
@@ -1409,6 +1415,11 @@ function buildShelfList(){const list=$('shelfList');list.innerHTML='';
 $('setBtn').onclick=()=>openSettings();$('setX').onclick=closeSettings;$('setDone').onclick=closeSettings;document.querySelectorAll('#setTabs .tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));$('settings').addEventListener('click',e=>{if(e.target.id==='settings')closeSettings();});
 $('shuffleAll').onclick=()=>{sections.forEach(sec=>{sec.seed=(Math.random()*1e9)|0;for(let i=games.length-1;i>=0;i--)if(games[i].sec===sec.id)games.splice(i,1);stockSection(sec);});rebuildGameMeshes();saveSections();toast('Every shelf restocked.');};
 $('randomAll').onclick=()=>{const pool=[...PKEYS].sort(()=>Math.random()-.5);sections.forEach((sec,i)=>{sec.plat=pool[i%pool.length];sec.seed=(Math.random()*1e9)|0;for(let k=games.length-1;k>=0;k--)if(games[k].sec===sec.id)games.splice(k,1);stockSection(sec);setSign(sec);});rebuildGameMeshes();saveSections();openShelves();toast('Shelves rearranged.');};
+/* one system on every bay: restock all shelves with it, no title repeated while unused ones remain */
+function fillAllSys(){$('allSys').innerHTML='<option value="" selected disabled>All bays…</option>'+PKEYS.map(p=>`<option value="${p}">${PLAT[p].name}</option>`).join('')+'<option value="mix">Mixed systems</option>';}
+fillAllSys();
+$('allSys').onchange=e=>{const p=e.target.value;if(!p)return;sections.forEach(sec=>{sec.plat=p;sec.seed=(Math.random()*1e9)|0;setSign(sec);});restockAll();saveSections();openShelves();fillAllSys();
+  toast(`Every bay now holds ${p==='mix'?'mixed systems':PLAT[p].name}.`);};
 $('resetShelves').onclick=()=>{sections.forEach((sec,i)=>{sec.plat=sec.defPlat;sec.seed=sec.defSeed;sec.scale=sec.defScale||1;sec.count=0;for(let k=games.length-1;k>=0;k--)if(games[k].sec===sec.id)games.splice(k,1);stockSection(sec);setSign(sec);});rebuildGameMeshes();saveSections();openShelves();};
 function signMeshes(){const a=[];for(const sec of sections)if(sec.signMesh){sec.signMesh.userData.secId=sec.id;a.push(sec.signMesh);}return a;}
 let sysSec=null;
