@@ -1126,9 +1126,11 @@ function keyboardCat(x,y,z,ry,sc,D=KBCAT){
   const anim=t=>{ // resting: a slow breath, blinks, an occasional ear twitch, the tail tip sways
     head.rotation.x=r0.x+Math.sin(t*1.3)*.012;head.rotation.y=r0.y+Math.sin(t*.27)*.03;
     let ey=1;if(t>nextBlink){const k=(t-nextBlink)/.2;if(k<1)ey=1-Math.sin(k*Math.PI)*.92;else nextBlink=t+2.5+Math.random()*4;}
-    for(const e of eyes)e.scale.y=ey;
     let tw=0;if(t>nextTwitch){const k=(t-nextTwitch)/.25;if(k<1)tw=Math.sin(k*Math.PI)*.25;else nextTwitch=t+3+Math.random()*5;}
-    ears[0].rotation.x=-.12-tw;
+    head.rotation.z=r0.z;const pt=kbCat&&kbCat.petAt!=null?t-kbCat.petAt:99;   // being petted: content squint, head nuzzles into the hand, ears flick
+    if(pt>=0&&pt<3.2){const f=Math.min(1,pt*4,(3.2-pt)*3);ey=Math.min(ey,1-.88*f);head.rotation.z+=Math.sin(pt*5)*.05*f;head.rotation.x+=-.04*f;tw=Math.max(tw,Math.abs(Math.sin(pt*7))*.2*f);}
+    for(const e of eyes)e.scale.y=ey;
+    ears[0].rotation.x=-.12-tw;ears[1].rotation.x=-.12-(pt<3.2?tw*.6:0);
     tail.rotation.y=Math.sin(t*.8)*.035;};
   kbCat={g,head,anim};
 }
@@ -1617,7 +1619,14 @@ function dRoot(text){say(text,[
   ['Do you buy or trade games?',()=>say('All day. Bring them in boxed if you can, manuals help too. I pay cash or give you a bit more as store credit, and trade-ins are two for one this week on anything from the pre-owned shelf.',[['What do you pay the most for?',()=>say('Complete copies in good shape, and anything that had a small print run. Loose discs with scratches, not so much. If it still has the spine card or the registration slip, even better.',[BACK,BYE])],BACK,BYE])],
   ['Who\'s in the photos by the door?',()=>say('Ha, that\'s me, a long time and a lot more hair ago. The one outside the shop front is from the first week we opened.',[['And the one with the trophy?',()=>say('Local tournament. I\'d love to tell you I won it. I was holding it for the kid who did.',[BACK,BYE])],['And the three of you in hats?',()=>say('My brothers and me on a trip up north. Nobody remembers whose idea the hats were.',[BACK,BYE])],BACK])],
   ['How long have you run this place?',()=>say('Since \'94. Started with two shelves of cartridges and a television I carried in myself. The televisions are still the heaviest thing in here.',[['Why keep the old TVs?',()=>say('These games were made for that glass. They just look right on it. Besides, people come in to play as much as to buy.',[BACK,BYE])],BACK,BYE])],
+  ['Can I pet the cat?',dCat],
   ['Just looking, thanks',()=>say('Take your time. Pick up anything you like.',[['Leave',closeDlg]])]]);}
+function petCat(){if(kbCat)kbCat.petAt=performance.now()/1000;}
+function dCat(){say('Go ahead, that\'s Pixel. She\'s slept on that keyboard since the day the PC came in. Mind the ears, she likes her chin scratched.',[
+  ['Scratch her chin',()=>{petCat();say('Hear that? She purrs like a disc drive spinning up. You\'ve made a friend.',[
+    ['Why is she called Pixel?',()=>say('She was the size of one when she turned up at the back door. Tiny and black, like a dead pixel on a screen. Now look at her.',[['Pet her again',()=>{petCat();say('She\'s melting. Careful, she\'ll never let you leave.',[BACK,BYE]);}],BACK,BYE])],
+    ['Does she ever get off the keyboard?',()=>say('For dinner, and when someone types on it. So, for dinner.',[BACK,BYE])],BACK,BYE]);}],
+  ['Maybe later',()=>dRoot('She\'ll be right there. She always is.')]]);}
 function dSystem(){say('Happy to. What do you play on?',[...PKEYS.map(p=>[PLAT[p].name,()=>dGenre(p)]),['Anything, surprise me',()=>dRec(pickOf(PKEYS),null)],BACK]);}
 function dGenre(p){const have=Object.keys(GENRES).filter(k=>REC[p][k]&&REC[p][k].length);say(`${PLAT[p].name}, good choice. What are you in the mood for?`,[...have.map(k=>[GENRES[k],()=>dRec(p,k)]),['Dealer\'s choice',()=>dRec(p,null)],['A different system',dSystem]]);}
 function whereIs(p){const w=sections.filter(sc=>sc.plat===p).map(sc=>sc.where.toLowerCase().replace(' · ',', '));return w.length?`${PLAT[p].name} is on the ${w.join(' and the ')}.`:`${PLAT[p].name} doesn't have its own shelf right now. Check the pre-owned section and the glass counters.`;}
