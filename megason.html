@@ -1713,11 +1713,12 @@ function say(text,opts){$('dlgText').textContent=text;const o=$('dlgOpts');o.inn
     if(back){b.insertAdjacentHTML('afterbegin',DLG_BACK);b.style.justifyContent='flex-start';b.appendChild(t);}else{b.appendChild(t);b.insertAdjacentHTML('beforeend',pri?DLG_EYE:DLG_CHEV);}
     b.onclick=fn;o.appendChild(b);}$('dlg').querySelector('.box').scrollTop=0;}
 // the customer has wandered round to his side of the counter (not in front of it)
-function behindCounter(){if(!clerk)return false;const c=clerk.g.position;return (player.x-c.x)*Math.sin(clerk.ry)+(player.z-c.z)*Math.cos(clerk.ry)<.45;}
+function counterDist(){const c=clerk.g.position;return (player.x-c.x)*Math.sin(clerk.ry)+(player.z-c.z)*Math.cos(clerk.ry);}   // how far in front of him, across the counter
+function behindCounter(){return !!clerk&&counterDist()<.45;}
 function openDialogue(){if(document.pointerLockElement)document.exitPointerLock();dlgOpen=true;$('dlg').style.display='flex';$('aim').style.display='none';
-  if(behindCounter()){clerk.mood(1);say('Get the f#%@ outta here!',[['Leave',closeDlg]]);return;}
+  if(behindCounter()){clerk.mood(1);clerk.angry=true;say('Get the f#%@ outta here!',[['Leave',closeDlg]]);return;}
   dRoot(pickOf(['Hey there. Looking for anything in particular?','Afternoon. What can I do for you?','Welcome in. Need a hand finding something?']));}
-function closeDlg(){dlgOpen=false;$('dlg').style.display='none';if(clerk)clerk.mood(0);}
+function closeDlg(){dlgOpen=false;$('dlg').style.display='none';}
 $('dlgX').onclick=closeDlg;
 const BACK=['Ask something else',()=>dRoot('Sure. What else?')],BYE=['That\'s all, thanks',()=>say('No problem. Shout if you need me.',[['Leave',closeDlg]])];
 function dRoot(text){say(text,[
@@ -1763,7 +1764,8 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
     const sy=Math.sin(player.yaw),cy=Math.cos(player.yaw);const dx=(-sy*f+cy*s)*sp,dz=(-cy*f-sy*s)*sp;
     if(free(player.x+dx,player.z))player.x+=dx;if(free(player.x,player.z+dz))player.z+=dz;if(l>.05)player.bob+=dt*9*Math.min(1,l);}
   if(kbCat)kbCat.anim(now/1000);
-  if(clerk){const t=now/1000;clerk.anim(t);let a=Math.atan2(player.x-clerk.g.position.x,player.z-clerk.g.position.z)-clerk.ry;a=Math.atan2(Math.sin(a),Math.cos(a));a=Math.max(-1.15,Math.min(1.15,a));clerk.head.rotation.y+=(a-clerk.head.rotation.y)*Math.min(1,dt*3);}
+  if(clerk){const t=now/1000;clerk.anim(t);if(clerk.angry&&counterDist()>.8){clerk.angry=false;clerk.mood(0);}   // stays cross until you're back on the customer side of the counter
+    let a=Math.atan2(player.x-clerk.g.position.x,player.z-clerk.g.position.z)-clerk.ry;a=Math.atan2(Math.sin(a),Math.cos(a));a=Math.max(-1.15,Math.min(1.15,a));clerk.head.rotation.y+=(a-clerk.head.rotation.y)*Math.min(1,dt*3);}
   if(SF.active)SF.drive(now);else if(freeView)orbit.update();else{camera.position.set(player.x,1.6+Math.sin(player.bob)*.025,player.z);camera.rotation.set(player.pitch,player.yaw,0);}
   if(spDirty.size){for(const p of spDirty)if(atlas[p].sptex)atlas[p].sptex.needsUpdate=true;spDirty.clear();}
   tvAcc+=dt;if(tvAcc>.05){tvAcc=0;updateTVs(now/1000);}
