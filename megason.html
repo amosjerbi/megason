@@ -1387,7 +1387,8 @@ function buildStore(){
   applyLayout(LAYOUT_DEFAULTS);
   [[2.3,1.95,1,.2],[2.3,1.45,3,.18]].forEach(([px,py,k,w])=>{const ph=framedPhoto(k,w);ph.rotation.y=Math.PI;ph.rotation.z=(k-2)*.012;ph.position.set(px,py,RZ-.012);scene.add(ph);});
   // FRONT WALL: a white library of games standing against the display window, its plain white back facing the street
-  shelfUnit({x:.9,z:RZ-.012,ry:Math.PI,L:3.17,H:SF_WTOP+.05,D:.34,rows:[.14,.41,.68,.95,1.22,1.49,1.76,2.03,2.3],style:'white',scale:COVER,plat:'mix',sign:{text:'JUST IN',bg:'#1e8f3a'},seed:41});
+  const winLib=shelfUnit({x:.9,z:RZ-.012,ry:Math.PI,L:3.17,H:SF_WTOP+.05,D:.34,rows:[.14,.41,.68,.95,1.22,1.49,1.76,2.03,2.3],style:'white',scale:COVER,plat:'mix',sign:{text:'JUST IN',bg:'#1e8f3a'},seed:41});
+  winLib.children[0].material=new THREE.MeshLambertMaterial({color:0x9a8c7a});   // dimmer, warm-tinted back so the window glows softly instead of glaring white
   block(-2.27,RZ-.36,.9,RZ);
   ['Left wall · bay 1 (front)','Left wall · bay 2','Left wall · bay 3','Left wall · bay 4','Left wall · bay 5','Left wall · bay 6','Left wall · bay 7','Left wall · bay 8 (back)',
    'Right wall · case 1 (front)','Right wall · case 2','Right wall · case 3','Right wall · case 4 (back)','Front wall · window library'].forEach((w,i)=>{if(sections[i])sections[i].where=w;});
@@ -1945,8 +1946,9 @@ const SF=(()=>{
       add(new THREE.ConeGeometry(.11,.14,16,1,true),lampM,x,2.42,F+.28);add(new THREE.SphereGeometry(.045,12,10),bulbM,x,2.36,F+.28);
       const l=new THREE.PointLight(0xffc890,7,5.5,1.4);l.position.set(x,2.3,F+.45);G.add(l);lights.push(l);}
     {const l=new THREE.PointLight(0xffd2a0,6,6,1.4);l.position.set(0,WTOP+2.4,F+1.1);G.add(l);lights.push(l);}
-    /* outdoor light: window spill on the pavement, the sign, and the alcove */
-    for(const [c,i,d,x,y,z] of [[0xffd6a0,5,4,(W0+W1)/2,1.1,F+1.2],[0xff9de0,4,3,0,SY,F+1.0],[0xffd9a8,3.5,2.6,(W0+W1)/2,WTOP-.25,RZ+.45],[0xffe6c8,2.5,3,DOORX,2.3,RZ+.6]]){
+    span(W0+.05,W1-.05,WTOP-.1,WTOP-.075,RZ+.12,RZ+.16,basic({color:0xffc27a,toneMapped:false}));   // hidden warm lamp strip along the top of the display
+    /* outdoor light: window spill on the pavement, the sign, and the alcove; warm lamps inside the display */
+    for(const [c,i,d,x,y,z] of [[0xffd6a0,5,4,(W0+W1)/2,1.1,F+1.2],[0xff9de0,4,3,0,SY,F+1.0],[0xffb870,3.5,2.6,(W0+W1)/2,WTOP-.25,RZ+.45],[0xffa24a,2.6,2.2,W0+.75,WTOP-.35,RZ+.3],[0xffa24a,2.6,2.2,W1-.75,WTOP-.35,RZ+.3],[0xffe6c8,2.5,3,DOORX,2.3,RZ+.6]]){
       const l=new THREE.PointLight(c,i,d,1.6);l.position.set(x,y,z);G.add(l);lights.push(l);}
     frameCam();
   }
