@@ -1246,14 +1246,40 @@ function realConsoleBox(e,maxW=.58,maxH=.4){
   pumpScans();return m;}
 
 /* back wall: black cube shelving from the floor to the ceiling, packed with real console boxes facing out */
+/* boxed consoles for systems without a box scan: a plain shop-style carton in the system's colours with its name and a
+   product photo of the hardware (Evan Amos and others, Wikimedia Commons, freely licensed). No logos. */
+const PHOTO_BOXES={
+  snes:['SUPER NINTENDO','16-BIT · 1990','#d9d6e3','#4b3f8f','#1b1b1f','https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/SNES-Mod1-Console-Set.png/960px-SNES-Mod1-Console-Set.png'],
+  n64:['NINTENDO 64','64-BIT · 1996','#141416','#c8202f','#fff','https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Nintendo-64-wController-L.jpg/960px-Nintendo-64-wController-L.jpg'],
+  ps1:['PLAYSTATION','32-BIT · 1994','#1c1c22','#8a8a94','#fff','https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/PSX-Console-wController.jpg/960px-PSX-Console-wController.jpg'],
+  ps2:['PLAYSTATION 2','128-BIT · 2000','#0b1c52','#2f6fd6','#fff','https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Sony_PlayStation_2.png/960px-Sony_PlayStation_2.png'],
+  gc:['GAMECUBE','128-BIT · 2001','#3b2470','#7c5cc4','#fff','https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/GameCube-Console-Set.png/960px-GameCube-Console-Set.png'],
+  wii:['WII','2006','#f4f4f4','#3ab4e8','#3a3a40','https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Wii-Console.png/960px-Wii-Console.png'],
+  nds:['NINTENDO DS','HANDHELD · 2004','#e9ecf0','#2a62c9','#1b1b1f','https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Nintendo-DS-Fat-Blue.png/960px-Nintendo-DS-Fat-Blue.png'],
+  gba:['GAME BOY ADVANCE','HANDHELD · 2001','#3a2a7a','#9c7ae0','#fff','https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Nintendo-Game-Boy-Advance-Purple-FL.png/960px-Nintendo-Game-Boy-Advance-Purple-FL.png'],
+  psp:['PSP','HANDHELD · 2004','#101014','#5a5a66','#fff','https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/PSP-1000.png/960px-PSP-1000.png']};
+function photoConsoleBox(t,maxW=.58,maxH=.4){const [name,sub,bg,acc,fg,url]=PHOTO_BOXES[t];
+  let H=maxH,Wd=H*1.3;if(Wd>maxW){Wd=maxW;H=Wd/1.3;}const D=Math.min(.32,Wd*.5);
+  const c=document.createElement('canvas');c.width=520;c.height=400;const x=c.getContext('2d');
+  const draw=img=>{x.fillStyle=bg;x.fillRect(0,0,520,400);x.fillStyle=acc;x.fillRect(0,0,520,70);x.fillRect(0,372,520,28);
+    x.fillStyle='#fff';x.globalAlpha=.92;x.fillRect(26,86,468,268);x.globalAlpha=1;
+    if(img){const sc=Math.min(440/img.width,240/img.height),w=img.width*sc,h=img.height*sc;x.drawImage(img,260-w/2,220-h/2,w,h);}
+    x.fillStyle=acc===fg?'#fff':fg;x.font='bold 40px "Archivo Black",Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#fff';x.fillText(name,260,37,490);
+    x.font='bold 15px Arial,sans-serif';x.fillStyle='#fff';x.fillText(sub,260,387);};
+  draw(null);const t2=new THREE.CanvasTexture(c);t2.colorSpace=THREE.SRGBColorSpace;t2.anisotropy=MAXANISO;
+  loadImgOnce(proxied(url)+'&bg=ffffff').catch(()=>loadUrlImage(url)).then(img=>{draw(img);   // bg=ffffff: transparent PNGs flatten onto white, not black
+if(canUse(x))t2.needsUpdate=true;else{draw(null);t2.needsUpdate=true;}}).catch(()=>{});
+  const side=new THREE.MeshLambertMaterial({color:new THREE.Color(bg)}),band=new THREE.MeshLambertMaterial({color:new THREE.Color(acc)});
+  const m=new THREE.Mesh(boxGeo(Wd,H,D),[side,side,band,side,new THREE.MeshLambertMaterial({map:t2}),side]);m.userData.size=[Wd,H,D];return m;}
 function backWall(){const x0=-RX+.33,x1=RX-.35,W=x1-x0,D=.42,z0=-RZ,cols=7,cw=W/cols,levels=[.1,.56,1.02,1.48,1.94,2.4],top=2.88;
   add(scene,boxGeo(W,top,.02),M.black,x0+W/2,top/2,z0+.01);
   for(let i=0;i<=cols;i++)add(scene,boxGeo(.03,top,D),M.black,x0+i*cw,top/2,z0+D/2);
   for(const y of[...levels,top])add(scene,boxGeo(W,.025,D),M.black,x0+W/2,y-.0125,z0+D/2);
   add(scene,boxGeo(W,.09,.01),M.black,x0+W/2,.045,z0+D);
-  const r=rng(77),order=CONSOLE_SCANS.map((e,i)=>[r(),e]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);let k=0;
+  // Sega box scans mixed with cartons for the other systems, reshuffled on every visit
+  const r=Math.random,pool=[...CONSOLE_SCANS.map(e=>({e})),...Object.keys(PHOTO_BOXES).flatMap(t=>[{t},{t}])],order=pool.map(o=>[r(),o]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);let k=0;
   levels.forEach(y=>{for(let c=0;c<cols;c++){const cx=x0+(c+.5)*cw,zf=z0+D;
-    const m=realConsoleBox(order[k++%order.length],cw-.07,.4);const [bw,bh,bd]=m.userData.size;
+    const o=order[k++%order.length],m=o.t?photoConsoleBox(o.t,cw-.07,.4):realConsoleBox(o.e,cw-.07,.4);const [bw,bh,bd]=m.userData.size;
     m.position.set(cx+(r()-.5)*.02,y+bh/2+.001,zf-bd/2-.015-r()*.015);m.rotation.y=(r()-.5)*.05;scene.add(m);}});}
 
 /* black glass counter with the register, as at the front left of the photo */
