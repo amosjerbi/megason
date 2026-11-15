@@ -1104,7 +1104,7 @@ function keyboardCat(x,y,z,ry,sc,D=KBCAT){
   const ears=[];
   for(const s of[-1,1]){const ew=.11*E.width,eh=.17*E.height,dep=.016;
     const ear=new THREE.Group();const phi=E.spread;ear.position.set(s*A1[0]*Math.sin(phi)*.9,A1[1]*Math.cos(phi)*.9-.012,-.012);
-    ear.rotation.order='ZYX';ear.rotation.z=-s*(phi*.55+E.tilt);ear.rotation.y=-s*.3;ear.rotation.x=-.12;head.add(ear);ears.push(ear);
+    ear.rotation.order='ZYX';ear.rotation.z=-s*(phi*.55+E.tilt);ear.rotation.y=-s*.3;ear.rotation.x=-.12;head.add(ear);ears.push(ear);ear.userData.z0=ear.rotation.z;ear.userData.s=s;
     const tri=(w,h,ox=0)=>{const sh=new THREE.Shape();sh.moveTo(-w/2+ox,0);sh.lineTo(w/2+ox,0);sh.lineTo(s*w*.08+ox,h);sh.closePath();return sh;};
     const outer=new THREE.ExtrudeGeometry(tri(ew,eh),{depth:dep,bevelEnabled:true,bevelSize:.004,bevelThickness:.004,bevelSegments:1});outer.translate(0,0,-dep/2);P(outer,fur,0,0,0,ear);
     const ig=new THREE.ExtrudeGeometry(tri(ew*.66,eh*.74),{depth:.003,bevelEnabled:false});P(ig,inner,0,eh*.1,dep/2+.003,ear);
@@ -1112,9 +1112,11 @@ function keyboardCat(x,y,z,ry,sc,D=KBCAT){
       const l=P(new THREE.BoxGeometry(.0028,.017,.0028),fur,lx-s*.007,ly+.004,dep*.3,ear);l.rotation.z=s*(1.05+k*.08);}}
 
   // eyes: round whites with tall slit pupils; cross pulls the pupils inward, lazyX drifts the cat's left eye
-  const eyes=[];
+  const eyes=[],brows=[];
   for(const s of[-1,1]){const f=onFace(s*Y.spacing,Y.height,-.004);
     const eye=new THREE.Group();eye.position.copy(f.p);facing(eye,f.n);head.add(eye);eyes.push(eye);
+    {const bf=onFace(s*Y.spacing*.92,Y.height+Y.size*1.05,.003),b=P(new THREE.BoxGeometry(Y.size*2.3,Y.size*.42,.006),pupil,0,0,0,head);   // angry brow, hidden until the shopkeeper gets cross
+     b.position.copy(bf.p);facing(b,bf.n);b.rotateZ(-s*.55);b.visible=false;brows.push(b);}
     const w=P(new THREE.SphereGeometry(Y.size,12,8),white,0,0,0,eye);w.scale.set(1,Y.round,.32);
     const px=-s*Y.cross+(s>0?Y.lazyX:0);
     const pp=P(new THREE.SphereGeometry(Y.size,10,8),pupil,px,0,Y.size*.27,eye);pp.scale.set(Y.pupilWidth*.62,Y.round*Y.pupilHeight,.1);}
@@ -1134,9 +1136,13 @@ function keyboardCat(x,y,z,ry,sc,D=KBCAT){
     let tw=0;if(t>nextTwitch){const k=(t-nextTwitch)/.25;if(k<1)tw=Math.sin(k*Math.PI)*.25;else nextTwitch=t+3+Math.random()*5;}
     head.rotation.z=r0.z;const pt=kbCat&&kbCat.petAt!=null?t-kbCat.petAt:99;   // being petted: content squint, head nuzzles into the hand, ears flick
     if(pt>=0&&pt<3.2){const f=Math.min(1,pt*4,(3.2-pt)*3);ey=Math.min(ey,1-.88*f);head.rotation.z+=Math.sin(pt*5)*.05*f;head.rotation.x+=-.04*f;tw=Math.max(tw,Math.abs(Math.sin(pt*7))*.2*f);}
+    const mad=!!(clerk&&clerk.angry);   // the cat sides with the shopkeeper: narrowed eyes, brows down, ears pinned back, tail lashing
+    if(mad){ey=Math.min(ey,.42);head.rotation.x+=-.05;}
     for(const e of eyes)e.scale.y=ey;
+    for(const b of brows)b.visible=mad;
     ears[0].rotation.x=-.12-tw;ears[1].rotation.x=-.12-(pt<3.2?tw*.6:0);
-    tail.rotation.y=Math.sin(t*.8)*.035;};
+    for(const e of ears){e.rotation.z=e.userData.z0-(mad?e.userData.s*.6:0);if(mad)e.rotation.x=-.65;}
+    tail.rotation.y=mad?Math.sin(t*4.5)*.12:Math.sin(t*.8)*.035;};
   kbCat={g,head,anim};
 }
 
