@@ -1924,7 +1924,7 @@ const SF=(()=>{
     const winPoster=(key,x,y,w,h)=>{const c=document.createElement('canvas');c.width=360;c.height=Math.round(360*h/w);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
       bx(w+.03,h+.03,.01,blackM,x,y,RZ+.025);pl(w,h,std({map:t,roughness:.55}),x,y,RZ+.031);
       posterImg(key).then(img=>{const x2=c.getContext('2d');drawFit(x2,img,c.width,c.height);if(canUse(x2))t.needsUpdate=true;}).catch(()=>{});};
-    winPoster(posterPick[1][0],W0+.45,1.86,.42,.6);winPoster(posterPick[2][0],W1-.42,1.9,.4,.56);
+    winPoster(posterPick[1][0],W0+.47,1.8,.6,.86);winPoster(posterPick[2][0],W1-.56,1.87,.46,.66);   // a big one-sheet on the left, a smaller print on the right
     fairyOn=basic({color:0xffe2a8,toneMapped:false});fairyDim=basic({color:0xb88a4a,toneMapped:false});
     const fg=new THREE.SphereGeometry(.02,8,6);
     for(const [z,sag] of [[F-.12,.2],[RZ+.15,.26]]){const pts=[];
