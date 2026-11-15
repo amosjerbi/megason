@@ -971,6 +971,7 @@ function salesman(x,z,ry,D=SHOPKEEPER){
   // ---- face (rev 3), fully driven by D (the DialKit panel): angular low-poly, bald with grey sides, worried wide-eyed look,
   // lazy left eye, wire glasses, eagle nose, soft moustache
   const fl=c=>new THREE.MeshLambertMaterial({color:skCol(c),flatShading:true});
+  const lips=[],brows=[];   // kept so mood() can turn the face angry
   {const H=D.head,E=D.eyes,B=D.brows,G=D.glasses,N=D.nose,M=D.moustache,O=D.mouth,R=D.hair;
   const skin=fl(D.skin),hair=fl(R.color),hairD=fl(R.shade),white=fl('#f4f1ea'),iris=fl(E.irisColor),wire=fl(G.color),stache=fl(M.color),lipC=fl(O.color);
   const fz=(H.depth-1)*.106;                                   // move face details with the front of the skull
@@ -1008,7 +1009,7 @@ function salesman(x,z,ry,D=SHOPKEEPER){
   for(const s of[-1,1]){const sx=s*E.spacing,lazy=s>0;
     const w=P(new THREE.SphereGeometry(.012,8,6),white,sx,E.height,Z(.098),head);w.scale.set(E.width,E.open,.45);
     P(new THREE.SphereGeometry(E.iris,6,5),iris,sx+(lazy?E.lazyX:0),E.height-.0005+(lazy?E.lazyY:0),Z(.1028),head);
-    const br=P(boxGeo(B.width,B.thickness,.012),fl(B.color),sx,B.height,Z(.104),head);br.rotation.z=s*B.tilt;
+    const br=P(boxGeo(B.width,B.thickness,.012),fl(B.color),sx,B.height,Z(.104),head);br.rotation.z=s*B.tilt;brows.push({m:br,s,y:B.height,t:B.tilt});
     if(G.show){P(new THREE.TorusGeometry(G.radius,G.wire,5,28),wire,sx,E.height-.001,Z(.111),head);
       P(boxGeo(.08,G.wire*1.4,G.wire*1.4),wire,s*A1[0]*.84,E.height+.002,Z(.064),head).rotation.y=Math.PI/2;}}
   if(G.show){const gap=Math.max(.004,2*(E.spacing-G.radius));P(boxGeo(gap,G.wire*1.6,G.wire*1.6),wire,0,E.height+.003,Z(.112),head);}
@@ -1016,7 +1017,7 @@ function salesman(x,z,ry,D=SHOPKEEPER){
   if(M.show){for(const sx of[-1,1]){const m=P(new THREE.CylinderGeometry(.009*M.thickness,.0053*M.thickness,.046*M.width,6),stache,sx*.021*M.width,.076,Z(.111),head);m.rotation.set(0,sx*-.25,sx*(Math.PI/2-M.droop));m.scale.z=.75;}
     const mc=P(new THREE.SphereGeometry(.0127*M.thickness,6,4),stache,0,.082,Z(.114),head);mc.scale.set(1.6*M.width,.82,.75);}
   // mouth: two halves so curve can turn it into a smile (+) or a frown (-)
-  for(const sx of[-1,1]){const l=P(boxGeo(O.width/2,.0045,.006),lipC,sx*O.width/4,O.height,Z(.105),head);l.rotation.z=sx*O.curve;}
+  for(const sx of[-1,1]){const l=P(boxGeo(O.width/2,.0045,.006),lipC,sx*O.width/4,O.height,Z(.105),head);l.rotation.z=sx*O.curve;lips.push({m:l,sx,c:O.curve,y:O.height});}
   }
   const lids=[];
   let nextBlink=2+Math.random()*3;
@@ -1025,7 +1026,10 @@ function salesman(x,z,ry,D=SHOPKEEPER){
     let lidX=.2;if(t>nextBlink){const k=(t-nextBlink)/.14;if(k<1)lidX=.2+Math.sin(k*Math.PI)*1.25;else nextBlink=t+2.5+Math.random()*4;}
     for(const l of lids)l.rotation.x=lidX;
     head.rotation.x=Math.sin(t*.7)*.025+Math.max(0,Math.sin(t*.23))*.04;head.rotation.z=Math.sin(t*.37)*.02;};
-  clerk={g,body,head,ry,anim};
+  // mood(1): scowl (brows pulled down and in, mouth turned down); mood(0): his usual face
+  const mood=k=>{for(const b of brows){b.m.rotation.z=b.s*(k?.42:b.t);b.m.position.y=b.y-(k?.007:0);}
+    for(const l of lips){l.m.rotation.z=l.sx*(k?-.5:l.c);l.m.position.y=l.y-(k?.003:0);}};
+  clerk={g,body,head,ry,anim,mood};
 }
 /* ---------------- keyboard cat ---------------- built in old/cat-keyboard.html (DialKit); KBCAT holds its defaults, paste new "Copy parameters" output here */
 let kbCat=null;
@@ -1708,8 +1712,12 @@ function say(text,opts){$('dlgText').textContent=text;const o=$('dlgOpts');o.inn
     if(pri)b.className='pri';else if(sec)b.className='sec';const t=document.createElement('span');t.textContent=label;
     if(back){b.insertAdjacentHTML('afterbegin',DLG_BACK);b.style.justifyContent='flex-start';b.appendChild(t);}else{b.appendChild(t);b.insertAdjacentHTML('beforeend',pri?DLG_EYE:DLG_CHEV);}
     b.onclick=fn;o.appendChild(b);}$('dlg').querySelector('.box').scrollTop=0;}
-function openDialogue(){if(document.pointerLockElement)document.exitPointerLock();dlgOpen=true;$('dlg').style.display='flex';$('aim').style.display='none';dRoot(pickOf(['Hey there. Looking for anything in particular?','Afternoon. What can I do for you?','Welcome in. Need a hand finding something?']));}
-function closeDlg(){dlgOpen=false;$('dlg').style.display='none';}
+// the customer has wandered round to his side of the counter (not in front of it)
+function behindCounter(){if(!clerk)return false;const c=clerk.g.position;return (player.x-c.x)*Math.sin(clerk.ry)+(player.z-c.z)*Math.cos(clerk.ry)<.45;}
+function openDialogue(){if(document.pointerLockElement)document.exitPointerLock();dlgOpen=true;$('dlg').style.display='flex';$('aim').style.display='none';
+  if(behindCounter()){clerk.mood(1);say('Get the f#%@ outta here!',[['Leave',closeDlg]]);return;}
+  dRoot(pickOf(['Hey there. Looking for anything in particular?','Afternoon. What can I do for you?','Welcome in. Need a hand finding something?']));}
+function closeDlg(){dlgOpen=false;$('dlg').style.display='none';if(clerk)clerk.mood(0);}
 $('dlgX').onclick=closeDlg;
 const BACK=['Ask something else',()=>dRoot('Sure. What else?')],BYE=['That\'s all, thanks',()=>say('No problem. Shout if you need me.',[['Leave',closeDlg]])];
 function dRoot(text){say(text,[
