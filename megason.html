@@ -1386,8 +1386,9 @@ function buildStore(){
   salesman(-.85,3.92,Math.PI);block(-1.1,3.65,-.6,4.15);LAYOUT.shopkeeper={clerk:true,x:-.85,z:3.92,ry:Math.PI,obs:[{r:obstacles.at(-1),r0:obstacles.at(-1).slice()}]};
   applyLayout(LAYOUT_DEFAULTS);
   [[2.3,1.95,1,.2],[2.3,1.45,3,.18]].forEach(([px,py,k,w])=>{const ph=framedPhoto(k,w);ph.rotation.y=Math.PI;ph.rotation.z=(k-2)*.012;ph.position.set(px,py,RZ-.012);scene.add(ph);});
-  // FRONT WALL: a white library of games standing against the display window, its plain white back facing the street
-  const winLib=shelfUnit({x:.9,z:RZ-.012,ry:Math.PI,L:3.17,H:SF_WTOP+.05,D:.34,rows:[.14,.41,.68,.95,1.22,1.49,1.76,2.03,2.3],style:'white',scale:COVER,plat:'mix',sign:{text:'JUST IN',bg:'#1e8f3a'},seed:41});
+  // FRONT WALL: a white library of one platform's games standing against the display window, its plain white back facing the street
+  const libP=PKEYS[Math.floor(Math.random()*PKEYS.length)];   // one platform at a time, picked fresh on every visit
+  const winLib=shelfUnit({x:.9,z:RZ-.012,ry:Math.PI,L:3.17,H:SF_WTOP+.05,D:.34,rows:[.14,.41,.68,.95,1.22,1.49,1.76,2.03,2.3],style:'white',scale:COVER,plat:libP,sign:{text:PLAT[libP].name.toUpperCase(),bg:PLAT[libP].sign},seed:41});
   winLib.children[0].material=new THREE.MeshLambertMaterial({color:0x9a8c7a});   // dimmer, warm-tinted back so the window glows softly instead of glaring white
   block(-2.27,RZ-.36,.9,RZ);
   ['Left wall · bay 1 (front)','Left wall · bay 2','Left wall · bay 3','Left wall · bay 4','Left wall · bay 5','Left wall · bay 6','Left wall · bay 7','Left wall · bay 8 (back)',
