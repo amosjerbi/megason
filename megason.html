@@ -1809,7 +1809,8 @@ const SF=(()=>{
       for(let i=0;i<4;i++)for(let j=0;j<4;j++){x.fillStyle=`hsl(30,4%,${34+rnd()*8}%)`;x.fillRect(i*q+2,j*q+2,q-4,q-4);}
       for(let n=0;n<1600;n++){x.fillStyle=rnd()<.5?'rgba(0,0,0,.12)':'rgba(255,255,255,.08)';x.fillRect(rnd()*w,rnd()*h,2,2);}},[12,9]);
     const street=pl(32,24,std({map:paveT,roughness:.85}),0,0,RZ+12);street.rotation.x=-Math.PI/2;
-    {const [pk,sys]=ROLLUP_POOL[Math.floor(Math.random()*ROLLUP_POOL.length)];rollupStand(-2.48,F+.55,.22,pk,PLAT[sys].name.toUpperCase());}   // roll-up banner on the pavement, left of the window: a different real poster every visit
+    const posterPick=[...ROLLUP_POOL].sort(()=>Math.random()-.5);   // roll-up and the two window posters all differ, reshuffled every visit
+    {const [pk,sys]=posterPick[0];rollupStand(-2.48,F+.55,.22,pk,PLAT[sys].name.toUpperCase());}   // roll-up banner on the pavement, left of the window: a different real poster every visit
     /* walls either side: plain dark brown, a darker skirting strip at the floor */
     /* painted cinder block: 40x20 cm blocks in running bond, painted dark brown */
     const wallT=ctex(512,512,(x,w,h)=>{x.fillStyle='#22160f';x.fillRect(0,0,w,h);const bw=256,bh=128,m=7;
@@ -1919,6 +1920,11 @@ const SF=(()=>{
     deckConsole('n64',crtX-.3,ZF+.13,-.15,1.45);
     deckBox(1,rx-.1,ZF+.02,-.14);
     deckConsole('ps1',W1-.24,ZF+.13,-.3,1.5);
+    /* two real posters hung on the back of the display, either side of the big TV */
+    const winPoster=(key,x,y,w,h)=>{const c=document.createElement('canvas');c.width=360;c.height=Math.round(360*h/w);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+      bx(w+.03,h+.03,.01,blackM,x,y,RZ+.025);pl(w,h,std({map:t,roughness:.55}),x,y,RZ+.031);
+      posterImg(key).then(img=>{const x2=c.getContext('2d');drawFit(x2,img,c.width,c.height);if(canUse(x2))t.needsUpdate=true;}).catch(()=>{});};
+    winPoster(posterPick[1][0],W0+.45,1.86,.42,.6);winPoster(posterPick[2][0],W1-.42,1.9,.4,.56);
     fairyOn=basic({color:0xffe2a8,toneMapped:false});fairyDim=basic({color:0xb88a4a,toneMapped:false});
     const fg=new THREE.SphereGeometry(.02,8,6);
     for(const [z,sag] of [[F-.12,.2],[RZ+.15,.26]]){const pts=[];
